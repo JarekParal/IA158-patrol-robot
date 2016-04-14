@@ -300,3 +300,24 @@ void show_message_box(const char *title, const char *msg) {
 	while(!ev3_button_is_pressed(ENTER_BUTTON));
 	while(ev3_button_is_pressed(ENTER_BUTTON));
 }
+
+static void wait_for_press()
+{
+	while(!ev3_button_is_pressed(ENTER_BUTTON));
+	while(ev3_button_is_pressed(ENTER_BUTTON));
+}
+
+void walker_task(intptr_t exinf)
+{
+	motor_port_t wheels_port = EV3_PORT_A;
+	motor_type_t wheels_type = LARGE_MOTOR;
+	ev3_motor_config(wheels_port, wheels_type);
+
+	while(true)
+	{
+		wait_for_press();
+		ev3_motor_set_power(wheels_port, -50);
+		wait_for_press();
+		ev3_motor_set_power(wheels_port, +50);
+	}
+}

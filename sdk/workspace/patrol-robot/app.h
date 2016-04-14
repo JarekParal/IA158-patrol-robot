@@ -124,6 +124,7 @@ extern int32_t default_menu_font_height;
  */
 
 extern void	main_task(intptr_t exinf);
+extern void walker_task(intptr_t exinf);
 extern void bluetooth_echo_task(intptr_t exinf);
 
 // extern void	gpio_irq_dispatcher(intptr_t exinf);
