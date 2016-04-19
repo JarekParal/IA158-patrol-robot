@@ -1,5 +1,6 @@
 SRCLANG := c++
 
+APPL_CXXOBJS += Walker.o
 APPL_COBJS += 
 
 ifdef CONFIG_EV3RT_APPLICATION
