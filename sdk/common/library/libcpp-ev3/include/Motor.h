@@ -96,6 +96,8 @@ public:
      */
     inline void stop() { (void)ev3_motor_stop(mPort, mBrake); }
 
+	void rotate(int degrees, uint32_t speed, bool blocking);
+
 protected:
     /**
      * モータ接続ポート取得

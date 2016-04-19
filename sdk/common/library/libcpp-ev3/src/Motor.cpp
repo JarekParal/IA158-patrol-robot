@@ -50,3 +50,8 @@ void Motor::setBrake(bool brake)
     setPWM(mPWM);
 }
 
+void Motor::rotate(int degrees, uint32_t speed, bool blocking)
+{
+	ev3_motor_rotate(mPort, degrees, speed, blocking);
+}
+
