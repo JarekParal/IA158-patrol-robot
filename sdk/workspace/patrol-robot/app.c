@@ -305,17 +305,27 @@ static void wait_for_press()
 {
 	while(!ev3_button_is_pressed(ENTER_BUTTON));
 	while(ev3_button_is_pressed(ENTER_BUTTON));
+	ev3_speaker_play_tone(NOTE_C5, 300);
 }
 
 void walker_task(intptr_t exinf)
 {
+	fio = ev3_serial_open_file(EV3_SERIAL_DEFAULT);
+	fprintf(fio, "Ahoj svete");
+
+	ev3_led_set_color(LED_ORANGE);
 	motor_port_t wheels_port = EV3_PORT_A;
 	motor_type_t wheels_type = LARGE_MOTOR;
-	ev3_motor_config(wheels_port, wheels_type);
+	ER rv = ev3_motor_config(wheels_port, wheels_type);
+	if (rv != E_OK)
+	{
+		ev3_speaker_play_tone(NOTE_C4, 1000);
+	} else {
+		ev3_speaker_play_tone(NOTE_A4, 5000);
+	}
 
 	while(true)
 	{
-		wait_for_press();
 		ev3_motor_set_power(wheels_port, -50);
 		wait_for_press();
 		ev3_motor_set_power(wheels_port, +50);
