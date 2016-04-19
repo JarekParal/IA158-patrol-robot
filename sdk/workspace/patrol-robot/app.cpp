@@ -12,7 +12,7 @@
 #include <Clock.h>
 
 #include "Walker.hpp"
-
+#include "Scanner.hpp"
 
 void main_task(intptr_t unused) {
 
@@ -27,6 +27,7 @@ static void wait_for_press()
 
 PositionStore position_store;
 Walker walker ( position_store );
+Scanner scanner ( position_store );
 
 void walker_task(intptr_t exinf)
 {
