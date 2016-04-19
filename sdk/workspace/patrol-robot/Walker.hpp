@@ -7,6 +7,7 @@ class Walker
 {
 	public:
 		Walker ( PositionStore & position_store );
+		void task();
 
 	private:
 		PositionStore & _position_store;

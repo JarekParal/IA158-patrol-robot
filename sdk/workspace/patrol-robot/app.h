@@ -81,8 +81,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void main_task(intptr_t exinf);
-    void walker_task(intptr_t exinf);
+void main_task(intptr_t exinf);
+void walker_task(intptr_t exinf);
+void scanner_task(intptr_t exinf);
+void tower_task(intptr_t exinf);
 #ifdef __cplusplus
 }
 #endif

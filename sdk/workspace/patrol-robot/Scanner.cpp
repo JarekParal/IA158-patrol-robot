@@ -5,3 +5,9 @@ Scanner::Scanner ( PositionStore const & position_store ) :
 {
 	;
 }
+
+void Scanner::task()
+{
+
+}
+

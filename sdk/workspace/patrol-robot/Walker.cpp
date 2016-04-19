@@ -5,3 +5,8 @@ Walker::Walker(PositionStore & position_store) :
 {
 
 }
+
+void Walker::task()
+{
+}
+

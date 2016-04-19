@@ -11,8 +11,10 @@
 #include <Motor.h>
 #include <Clock.h>
 
+#include "Position.hpp"
 #include "Walker.hpp"
 #include "Scanner.hpp"
+#include "Tower.hpp"
 
 void main_task(intptr_t unused) {
 
@@ -28,6 +30,7 @@ static void wait_for_press()
 PositionStore position_store;
 Walker walker ( position_store );
 Scanner scanner ( position_store );
+Tower tower ( position_store );
 
 void walker_task(intptr_t exinf)
 {
@@ -39,4 +42,19 @@ void walker_task(intptr_t exinf)
 		main_motor.setPWM(-100);
 		c.sleep(1000);
 	}
+
+	while (true)
+		walker.task();
+}
+
+void scanner_task(intptr_t exinf)
+{
+	while (true)
+		scanner.task();
+}
+
+void tower_task(intptr_t exinf)
+{
+	while (true)
+		tower.task();
 }

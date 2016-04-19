@@ -7,6 +7,7 @@ class Scanner
 {
 	public:
 		Scanner ( PositionStore const & position_store );
+		void task();
 
 	private:
 		PositionStore const & _position_store;
