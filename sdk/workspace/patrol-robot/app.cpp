@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <Port.h>
 #include <Motor.h>
-#include <Clock.h>
 
 #include "Position.hpp"
 #include "Walker.hpp"
@@ -28,21 +27,12 @@ static void wait_for_press()
 }
 
 PositionStore position_store;
-Walker walker ( position_store );
+Walker walker ( ePortM::PORT_A, ePortS::PORT_1, position_store );
 Scanner scanner ( position_store );
 Tower tower ( position_store );
 
 void walker_task(intptr_t exinf)
 {
-	ev3api::Motor main_motor(ePortM::PORT_A);
-	ev3api::Clock c;
-	while(true) {
-		main_motor.setPWM(100);
-		c.sleep(1000);
-		main_motor.setPWM(-100);
-		c.sleep(1000);
-	}
-
 	while (true)
 		walker.task();
 }
