@@ -24,11 +24,10 @@ void main_task(intptr_t unused) {
 
 }
 
-PositionStore position_store;
-PositionEvent position_event;
-Walker walker ( ePortM::PORT_A, ePortS::PORT_1, position_store, position_event );
-Scanner scanner ( position_store );
-Tower tower ( position_store );
+PositionEvent position_event; // must be constructed before scanner and tower!
+Walker walker ( ePortM::PORT_A, ePortS::PORT_1, position_event );
+Scanner scanner ( position_event );
+Tower tower ( position_event );
 
 void walker_task(intptr_t exinf)
 {

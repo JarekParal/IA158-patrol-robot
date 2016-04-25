@@ -11,7 +11,6 @@ class Walker
 	public:
 		Walker ( ePortM motor_port,
 				 ePortS color_port,
-				 PositionStore & position_store,
 				 PositionEvent const & position_event
 				 );
 
@@ -34,7 +33,6 @@ class Walker
 
 		ev3api::Motor   _motor;
 		ev3api::ColorSensor _color_sensor;
-		PositionStore & _position_store;
 		PositionEvent const & _position_event;
 
 

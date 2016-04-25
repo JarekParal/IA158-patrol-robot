@@ -6,12 +6,12 @@
 class Tower
 {
 	public:
-		Tower ( PositionStore const & position_store );
+		Tower ( PositionEvent & position_event );
 
 		void task();
 
 	private:
-		PositionStore const & _position_store;
+		void received_position_message(PositionMessage msg);
 };
 
 #endif // TOWER_HPP

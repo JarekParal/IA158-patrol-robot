@@ -1,12 +1,18 @@
 #include "Scanner.hpp"
 
-Scanner::Scanner ( PositionStore const & position_store ) :
-	_position_store ( position_store )
+Scanner::Scanner ( PositionEvent & position_event )
 {
-	;
+	position_event.insert([this](PositionMessage msg){
+		received_position_message(msg);
+	});
 }
 
 void Scanner::task()
+{
+
+}
+
+void Scanner::received_position_message(PositionMessage msg)
 {
 
 }

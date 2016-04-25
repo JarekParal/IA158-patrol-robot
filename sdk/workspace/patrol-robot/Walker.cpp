@@ -11,12 +11,10 @@
 Walker::Walker (
 		ePortM motor_port,
 		ePortS color_port,
-		PositionStore & position_store,
 		PositionEvent const & position_event )
 :
 	_motor          ( motor_port     ),
 	_color_sensor   ( color_port     ),
-	_position_store ( position_store ),
 	_position_event ( position_event )
 {
 }
@@ -76,8 +74,6 @@ void Walker::step()
 
 	if ( _current_direction == Direction::Left )
 		_current_position--;
-
-	// TODO notify everyone
 }
 
 void Walker::change_direction()
@@ -94,8 +90,6 @@ void Walker::change_direction()
 			_motor.setPWM(50);
 			break;
 	}
-
-	// TODO: Notify everyone
 }
 
 void Walker::task()

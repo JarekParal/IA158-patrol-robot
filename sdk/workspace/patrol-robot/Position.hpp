@@ -5,7 +5,6 @@
 #include "Event.hpp"
 
 using Position = int32_t;
-using PositionStore = std::atomic<Position>;
 
 enum class Direction
 {

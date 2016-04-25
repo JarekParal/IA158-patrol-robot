@@ -6,11 +6,11 @@
 class Scanner
 {
 	public:
-		Scanner ( PositionStore const & position_store );
+		Scanner ( PositionEvent & position_event );
 		void task();
 
 	private:
-		PositionStore const & _position_store;
+		void received_position_message(PositionMessage msg);
 };
 
 #endif // SCANNER_HPP
