@@ -11,7 +11,9 @@ class Walker
 	public:
 		Walker ( ePortM motor_port,
 				 ePortS color_port,
-				 PositionStore & position_store );
+				 PositionStore & position_store,
+				 PositionEvent const & position_event
+				 );
 
 		void init();
 		void task();
@@ -24,12 +26,6 @@ class Walker
 			Red
 		};
 
-		enum class Direction
-		{
-			Left,
-			Right
-		};
-
 		PositionColor next_color(rgb_raw_t const & from) const;
 		void update_position(PositionColor c);
 
@@ -39,6 +35,8 @@ class Walker
 		ev3api::Motor   _motor;
 		ev3api::ColorSensor _color_sensor;
 		PositionStore & _position_store;
+		PositionEvent const & _position_event;
+
 
 		PositionColor _current_color;
 		Position      _current_position;

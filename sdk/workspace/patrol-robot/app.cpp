@@ -15,6 +15,11 @@
 #include "Scanner.hpp"
 #include "Tower.hpp"
 
+extern "C"
+{
+	void *__dso_handle = NULL;
+}
+
 void main_task(intptr_t unused) {
 
 }
@@ -27,7 +32,8 @@ static void wait_for_press()
 }
 
 PositionStore position_store;
-Walker walker ( ePortM::PORT_A, ePortS::PORT_1, position_store );
+PositionEvent position_event;
+Walker walker ( ePortM::PORT_A, ePortS::PORT_1, position_store, position_event );
 Scanner scanner ( position_store );
 Tower tower ( position_store );
 

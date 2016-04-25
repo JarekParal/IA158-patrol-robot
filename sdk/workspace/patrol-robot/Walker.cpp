@@ -8,11 +8,16 @@
  */
 
 
-Walker::Walker(ePortM motor_port, ePortS color_port, PositionStore & position_store)
+Walker::Walker (
+		ePortM motor_port,
+		ePortS color_port,
+		PositionStore & position_store,
+		PositionEvent const & position_event )
 :
 	_motor          ( motor_port     ),
 	_color_sensor   ( color_port     ),
-	_position_store ( position_store )
+	_position_store ( position_store ),
+	_position_event ( position_event )
 {
 }
 
@@ -61,6 +66,7 @@ void Walker::update_position(PositionColor c)
 		change_direction();
 
 	_current_color = c;
+	_position_event.invoke(PositionMessage{_current_direction, _current_position});
 }
 
 void Walker::step()
