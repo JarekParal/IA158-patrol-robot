@@ -97,5 +97,6 @@ void Walker::task()
 	rgb_raw_t rgb;
 	_color_sensor.getRawColor(rgb);
 	PositionColor c = next_color(rgb);
+	update_position(c);
 }
 
