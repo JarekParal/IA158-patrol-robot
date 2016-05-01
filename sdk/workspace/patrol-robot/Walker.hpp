@@ -30,6 +30,7 @@ class Walker
 
 		void step();
 		void change_direction();
+		void play_sound(PositionColor color);
 
 		ev3api::Motor   _motor;
 		ev3api::ColorSensor _color_sensor;

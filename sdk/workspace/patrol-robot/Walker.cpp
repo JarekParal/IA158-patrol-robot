@@ -53,11 +53,31 @@ Walker::PositionColor Walker::next_color(rgb_raw_t const & rgb) const
 	return c;
 }
 
+void Walker::play_sound(PositionColor color)
+{
+	switch ( color )
+	{
+		case PositionColor::Black:
+			ev3_speaker_play_tone(1500, 300);
+			break;
+
+		case PositionColor::White:
+			ev3_speaker_play_tone(2002, 300);
+			break;
+
+		case PositionColor::Red:
+			ev3_speaker_play_tone(1000, 800);
+			break;
+
+	}
+}
+
 void Walker::update_position(PositionColor c)
 {
 	if ( c == _current_color )
 		return;
 
+	play_sound(c);
 	step();
 
 	if ( c == PositionColor::Red )
