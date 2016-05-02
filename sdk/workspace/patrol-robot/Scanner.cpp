@@ -11,3 +11,7 @@ void Scanner::init() {}
 void Scanner::task() {}
 
 void Scanner::received_position_message(PositionMessage msg) {}
+
+void Scanner::subscribe_target(std::function<void(Target)> callback) {
+    target_msg_dispatch.insert(callback);
+}
