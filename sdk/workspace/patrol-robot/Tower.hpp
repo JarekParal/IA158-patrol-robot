@@ -1,6 +1,7 @@
 #ifndef TOWER_HPP
 #define TOWER_HPP
 
+#include "Common.hpp"
 #include "Position.hpp"
 
 class Tower

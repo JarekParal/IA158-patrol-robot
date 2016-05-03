@@ -30,7 +30,8 @@ class Walker
 
 		void step();
 		void change_direction();
-		void play_sound(PositionColor color);
+		void update_led();
+		PositionColor candidate_color(PositionColor c);
 
 		ev3api::Motor   _motor;
 		ev3api::ColorSensor _color_sensor;
@@ -42,6 +43,8 @@ class Walker
 		uint8_t       _candidate_remaining;
 		Position      _current_position;
 		Direction     _current_direction;
+
+		const int8_t abs_speed = 15;
 };
 
 #endif // WALKER_HPP

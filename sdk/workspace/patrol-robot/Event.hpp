@@ -7,7 +7,7 @@
 #define EVENT_HPP
 
 #include <functional> // std::function
-#include <vector>     // std::vector
+#include <array>
 
 template < typename... Args >
 class Event
@@ -16,21 +16,22 @@ class Event
 		using DelegateType = void(Args...);
 		using Delegate = std::function<DelegateType>;
 
+		Event() : _index(0) {}
+
 		void insert(Delegate d)
 		{
-			_delegates.push_back(d);
+			_delegates[_index++] = d;
 		}
 
 		void invoke(Args... args) const
 		{
-			for ( Delegate d : _delegates )
-			{
-				d(args...);
-			}
+			for (size_t i = 0; i != _index; i++)
+				_delegates[i](args...);
 		}
 
 	private:
-		std::vector<Delegate> _delegates;
+		std::array<Delegate, 10> _delegates;
+		size_t _index;
 };
 
 #endif // EVENT_HPP

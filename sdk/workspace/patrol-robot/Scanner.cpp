@@ -2,8 +2,8 @@
 
 Scanner::Scanner(ePortS sonar_port, PositionEvent& position_event)
     : _sonar(sonar_port) {
-    position_event.insert(
-            [this](PositionMessage msg) { received_position_message(msg); });
+    /*position_event.insert(
+            [this](PositionMessage msg) { received_position_message(msg); });*/
 }
 
 void Scanner::init() {}

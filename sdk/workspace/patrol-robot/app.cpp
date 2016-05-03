@@ -36,9 +36,7 @@ struct PatrolRobot {
         , scanner(ePortS::PORT_2, position_event)
         , tower(position_event)
     {
-        scanner.subscribe_target([&](Target t) {
-            t.position++;
-        });
+        
     }
 };
 
