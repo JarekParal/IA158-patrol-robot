@@ -22,7 +22,7 @@ class Walker
 		{
 			Black,
 			White,
-			Red
+			Blue
 		};
 
 		PositionColor next_color(rgb_raw_t const & from) const;
@@ -38,6 +38,8 @@ class Walker
 
 
 		PositionColor _current_color;
+		PositionColor _candidate_color;
+		uint8_t       _candidate_remaining;
 		Position      _current_position;
 		Direction     _current_direction;
 };

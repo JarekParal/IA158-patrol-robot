@@ -7,8 +7,10 @@
 #include "ev3api.h"
 #include "app.h"
 #include <unistd.h>
+#include <ctype.h>
 #include <Port.h>
 #include <Motor.h>
+#include <Clock.h>
 
 #include "Common.hpp"
 #include "Position.hpp"
@@ -19,6 +21,8 @@
 extern "C" {
 void* __dso_handle = NULL;
 }
+
+FILE *bt;
 
 struct PatrolRobot {
     PositionEvent
@@ -41,6 +45,9 @@ struct PatrolRobot {
 PatrolRobot* robot;
 
 void main_task(intptr_t unused) {
+    bt = fdopen(/*SIO_BT_FILENO*/5, "a+");
+    assert(bt != NULL);
+
     PatrolRobot _robot;
     robot = &_robot;
 
@@ -51,8 +58,12 @@ void walker_task(intptr_t exinf) {
     ev3_speaker_set_volume(100);
     robot->walker.init();
     ev3_speaker_play_tone(2000, 800);
+    ev3api::Clock c;
     while (true)
+    {
         robot->walker.task();
+    }
+        
 }
 
 void scanner_task(intptr_t exinf) {
