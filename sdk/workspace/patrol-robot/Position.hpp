@@ -4,18 +4,13 @@
 #include <atomic>
 #include "Event.hpp"
 
-using Position = int32_t;
+using Position = int16_t;
 
-enum class Direction
-{
-	Left,
-	Right
-};
+enum class Direction { Left, Right };
 
-struct PositionMessage
-{
-	Direction direction;
-	Position position;
+struct PositionMessage {
+    Direction direction;
+    Position position;
 };
 
 using PositionEvent = Event<PositionMessage>;

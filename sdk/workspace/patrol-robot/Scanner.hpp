@@ -3,7 +3,7 @@
 
 #include <Port.h>
 #include <SonarSensor.h>
-#include <vector>
+#include <array>
 #include <functional>
 
 #include "Common.hpp"
@@ -12,16 +12,24 @@
 
 class Scanner {
 public:
-    Scanner(ePortS sonar_port, PositionEvent& position_event);
-    void init();
+    Scanner(ePortS sonar_port, PositionEvent& position_event,
+            TargetEvent& target_event);
     void task();
 
-    void subscribe_target(std::function<void(Target)> callback);
 private:
+    enum class ScanningState { Init, Patrol };
+
     void received_position_message(PositionMessage msg);
+    void make_sample(int16_t position);
+    void scan_changes(int16_t position);
+    bool check_state(Direction dir);
+
+    static const size_t map_size = 256;
+    static const size_t allowed_error = 1; // in cm
     ev3api::SonarSensor _sonar;
-    std::vector<int16_t> depth_map;
-    Event<Target> target_msg_dispatch;
+    ScanningState _state;
+    TargetEvent const& _target_event;
+    std::array<int16_t, map_size> _depth_map;
 };
 
 #endif // SCANNER_HPP

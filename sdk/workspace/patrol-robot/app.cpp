@@ -22,12 +22,13 @@ extern "C" {
 void* __dso_handle = NULL;
 }
 
-FILE *bt;
+FILE* bt;
 
 struct PatrolRobot {
     PositionEvent
             position_event; // must be constructed before scanner and tower!
     TowerCommandEvent tower_command;
+    TargetEvent target_event;
 
     Walker walker;
     Scanner scanner;
@@ -35,9 +36,8 @@ struct PatrolRobot {
 
     PatrolRobot()
         : walker(ePortM::PORT_A, ePortS::PORT_1, position_event)
-        , scanner(ePortS::PORT_2, position_event)
-        , tower(ePortM::PORT_B, ePortM::PORT_C, position_event, tower_command)
-    {
+        , scanner(ePortS::PORT_2, position_event, target_event)
+        , tower(ePortM::PORT_B, ePortM::PORT_C, position_event, tower_command) {
         // Temp
         TowerMessage ev;
         ev.command = TowerMessage::Command::LOCK;
@@ -49,11 +49,12 @@ struct PatrolRobot {
 PatrolRobot* robot;
 
 void main_task(intptr_t unused) {
-    bt = fdopen(/*SIO_BT_FILENO*/5, "a+");
+    bt = fdopen(/*SIO_BT_FILENO*/ 5, "a+");
     assert(bt != NULL);
 
     robot = new PatrolRobot;
 
+    act_tsk(SCANNER_TASK);
     act_tsk(TOWER_TASK);
     act_tsk(WALKER_TASK);
 }
@@ -63,17 +64,17 @@ void walker_task(intptr_t exinf) {
     robot->walker.init();
     ev3_speaker_play_tone(1000, 100);
     ev3api::Clock c;
-    while (true)
-    {
+    while (true) {
         robot->walker.task();
         tslp_tsk(2);
     }
-        
 }
 
 void scanner_task(intptr_t exinf) {
-    /*while (true)
-            scanner.task();*/
+    while (true) {
+        robot->scanner.task();
+        tslp_tsk(20);
+    }
 }
 
 void tower_task(intptr_t exinf) {
