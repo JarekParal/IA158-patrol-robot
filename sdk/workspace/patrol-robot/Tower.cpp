@@ -4,7 +4,7 @@ void foo(PositionMessage event) {
     fprintf(bt, "%lu\n", event.position);
 }
 
-Tower::Tower(PositionEvent & position_event)
+Tower::Tower(PositionEvent & position_event, TowerCommandEvent& commands)
 {
     position_event.insert(foo);
 	/*position_event.insert([this](PositionMessage msg){

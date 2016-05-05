@@ -27,6 +27,8 @@ FILE *bt;
 struct PatrolRobot {
     PositionEvent
             position_event; // must be constructed before scanner and tower!
+    TowerCommandEvent tower_command;
+
     Walker walker;
     Scanner scanner;
     Tower tower;
@@ -34,7 +36,7 @@ struct PatrolRobot {
     PatrolRobot()
         : walker(ePortM::PORT_A, ePortS::PORT_1, position_event)
         , scanner(ePortS::PORT_2, position_event)
-        , tower(position_event)
+        , tower(position_event, tower_command)
     {
         
     }

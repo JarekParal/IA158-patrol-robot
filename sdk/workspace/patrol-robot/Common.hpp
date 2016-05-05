@@ -1,8 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include "ev3api.h"
 #include <ctype.h>
+#include "ev3api.h"
+#include "Event.hpp"
 
 extern FILE *bt;
 
@@ -14,12 +15,15 @@ struct Target {
 using TargetEvent = Event<Target>;
 
 struct TowerMessage {
-    enum class Command { LOCK, UNLOCK };
+    enum class Command { LOCK, UNLOCK, FIRE };
     Command command;
-    Target target;
+    union  {
+        Target target;
+        uint16_t shot_number;
+    } params;
 };
 
-using TowerEvent = Event<TowerMessage>;
+using TowerCommandEvent = Event<TowerMessage>;
 
 struct FireMessage {
     uint16_t shot_number;
