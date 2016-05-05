@@ -7,8 +7,7 @@
 class Tower
 {
 	public:
-		Tower ( PositionEvent & position_event );
-
+		Tower (PositionEvent & position_event, );
 		void task();
 
 	private:
