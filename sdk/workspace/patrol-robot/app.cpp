@@ -36,9 +36,13 @@ struct PatrolRobot {
     PatrolRobot()
         : walker(ePortM::PORT_A, ePortS::PORT_1, position_event)
         , scanner(ePortS::PORT_2, position_event)
-        , tower(position_event, tower_command)
+        , tower(ePortM::PORT_B, ePortM::PORT_C, position_event, tower_command)
     {
-        
+        // Temp
+        TowerMessage ev;
+        ev.command = TowerMessage::Command::LOCK;
+        ev.params.target = {5, 10};
+        tower_command.invoke(ev);
     }
 };
 
@@ -48,20 +52,21 @@ void main_task(intptr_t unused) {
     bt = fdopen(/*SIO_BT_FILENO*/5, "a+");
     assert(bt != NULL);
 
-    PatrolRobot _robot;
-    robot = &_robot;
+    robot = new PatrolRobot;
 
+    act_tsk(TOWER_TASK);
     act_tsk(WALKER_TASK);
 }
 
 void walker_task(intptr_t exinf) {
     ev3_speaker_set_volume(100);
     robot->walker.init();
-    ev3_speaker_play_tone(2000, 800);
+    ev3_speaker_play_tone(1000, 100);
     ev3api::Clock c;
     while (true)
     {
         robot->walker.task();
+        tslp_tsk(2);
     }
         
 }
@@ -72,6 +77,8 @@ void scanner_task(intptr_t exinf) {
 }
 
 void tower_task(intptr_t exinf) {
-    /*while (true)
-            tower.task();*/
+    while (true) {
+        robot->tower.task();
+        tslp_tsk(50);
+    }
 }
