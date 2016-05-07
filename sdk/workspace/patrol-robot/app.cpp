@@ -17,6 +17,7 @@
 #include "Walker.hpp"
 #include "Scanner.hpp"
 #include "Tower.hpp"
+#include "Control.hpp"
 
 extern "C" {
 void* __dso_handle = NULL;
@@ -57,6 +58,7 @@ void main_task(intptr_t unused) {
     act_tsk(SCANNER_TASK);
     act_tsk(TOWER_TASK);
     act_tsk(WALKER_TASK);
+	control_loop();
 }
 
 void walker_task(intptr_t exinf) {
