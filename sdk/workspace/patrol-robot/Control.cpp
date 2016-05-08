@@ -1,3 +1,4 @@
+#include "Tower.hpp"
 #include "Control.hpp"
 
 TargetList::TargetList()
@@ -32,7 +33,7 @@ void TargetList::update ( Target t )
 		{
 			i.t.distance = t.distance;
 			i.last_seen = now;
-			return;
+			
 		}
 	}
 
@@ -83,7 +84,8 @@ void TargetList::remove ( TargetId id )
 	}
 }
 
-Control::Control ( ID mutex_id )
+Control::Control ( ID mutex_id, Tower & tower ) :
+	_tower ( tower )
 {
 	_mutex_id = mutex_id;
 }
@@ -123,7 +125,7 @@ static bool read_line(char * buf, size_t bufsz)
 {
 	while ( true ) {
 		char c = fgetc ( bt );
-		fputc ( c, bt ); // echo
+
 		if ( (c == '\n') || (c == '\r') )
 		{
 			if (bufsz > 0)
@@ -134,6 +136,11 @@ static bool read_line(char * buf, size_t bufsz)
 				return false;
 			}
 		}
+
+		if (iscntrl(c))
+			return false;
+
+		fputc ( c, bt ); // echo
 
 		if ( bufsz > 0 )
 		{
@@ -159,13 +166,23 @@ void Control::loop()
 		fprintf( bt, "> " );
 		char buff[80];
 		buff[0] = '\0';
-		read_line (buff, 80 );
+		bool valid = read_line (buff, 80 );
+		if ( !valid )
+		{
+			fprintf ( bt, "--discarded\n");
+			continue;
+		}
 
 		fprintf ( bt, "got: %s\n", buff );
 
 		if ( is_prefix_of ( "calibrate-tower", buff ) )
 		{
 			fprintf ( bt, "OK, we will calibrate tower\n" );
+			int angle;
+			if (1 == sscanf ( buff, "calibrate-tower %d", &angle ) )
+				_tower.calibrate(angle);
+			else
+				fprintf ( bt, "usage: calibrate-tower 45\n" );
 		} else if ( is_prefix_of ( "", buff) )
 		{
 

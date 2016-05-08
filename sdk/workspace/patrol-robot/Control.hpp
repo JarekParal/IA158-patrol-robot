@@ -32,11 +32,12 @@ class TargetList
 		TargetId _max_id;
 };
 
+class Tower;
 
 class Control
 {
 	public:
-		explicit Control ( ID mutex_id );
+		explicit Control ( ID mutex_id, Tower & tower );
 		void loop();
 		void here_is_a_target ( Target t );
 		void every_1s();
@@ -44,6 +45,7 @@ class Control
 	private:
 		TargetList _target_list;
 		ID         _mutex_id;
+		Tower    & _tower;
 };
 
 

@@ -86,3 +86,17 @@ void Tower::update_position(double angle) {
     _rotation_motor.rotate(diff, speed, false);
 }
 
+void Tower::calibrate(int16_t angle)
+{
+	if ( angle > 180 )
+		return;
+
+	if ( angle < -180 )
+		return;
+
+	_rotation_motor.rotate(angle * gear_ratio, speed, true);
+	_rotation_motor.reset();
+
+}
+
+
