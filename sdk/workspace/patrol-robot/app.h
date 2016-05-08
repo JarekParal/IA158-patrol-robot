@@ -88,6 +88,11 @@ void tower_every_1ms();
 
 void walker_task(intptr_t exinf);
 void walker_SmoothMotor_every_1ms();
+
+
+void every_1s();
+void every_1ms();
+
 #ifdef __cplusplus
 }
 #endif

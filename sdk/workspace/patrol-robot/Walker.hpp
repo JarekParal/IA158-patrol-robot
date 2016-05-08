@@ -4,19 +4,19 @@
 #include <Port.h>
 #include <Motor.h>
 #include <ColorSensor.h>
-#include "Position.hpp"
+#include "Common.hpp"
 #include "SmoothMotor.hpp"
 
 class Walker
 {
 	public:
 		Walker ( SmoothMotor & motor,
-				 ePortS color_port,
-				 PositionEvent const & position_event
-				 );
+				 ePortS color_port );
 
 		void init();
 		void task();
+
+		Event<PositionMessage> on_position_change;
 
 	private:
 		enum class PositionColor
@@ -36,7 +36,6 @@ class Walker
 
 		SmoothMotor     & _motor;
 		ev3api::ColorSensor _color_sensor;
-		PositionEvent const & _position_event;
 
 
 		PositionColor _current_color;

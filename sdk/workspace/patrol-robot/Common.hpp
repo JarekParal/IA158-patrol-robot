@@ -2,14 +2,27 @@
 
 #include <cstdint>
 #include <ctype.h>
+#include <functional>
 #include "ev3api.h"
-#include "Event.hpp"
+
+template < typename Message>
+using Event = std::function<void(Message)>;
 
 extern FILE *bt;
 
+using Position = int16_t;
+using Distance = int16_t;
+
+enum class Direction { Left, Right };
+
+struct PositionMessage {
+    Direction direction;
+    Position position;
+};
+
 struct Target {
-    int16_t position;
-    int16_t distance;
+    Position position;
+    Distance distance;
 };
 
 using TargetEvent = Event<Target>;

@@ -13,41 +13,62 @@
 #include <Clock.h>
 
 #include "Common.hpp"
-#include "Position.hpp"
 #include "Walker.hpp"
 #include "Scanner.hpp"
 #include "Tower.hpp"
 #include "Control.hpp"
 #include "SmoothMotor.hpp"
 
-extern "C" {
-void* __dso_handle = NULL;
-}
-
 FILE* bt;
 
-struct PatrolRobot {
-    PositionEvent
-            position_event; // must be constructed before scanner and tower!
-    TowerCommandEvent tower_command;
-    TargetEvent target_event;
+class PatrolRobot {
+	public:
+	    PatrolRobot();
+
+		void every_1s();
+		void every_1ms();
+
+	public:
 
 	SmoothMotor walking_motor;
     Walker walker;
     Scanner scanner;
     Tower tower;
+	Control control;
 
-    PatrolRobot()
-        : walking_motor(ePortM::PORT_A, Walker_SmoothMotor_MUTEX),
-			walker(walking_motor, ePortS::PORT_1, position_event)
-        , scanner(ePortS::PORT_2, position_event, target_event)
-        , tower(ePortM::PORT_B, ePortM::PORT_C, position_event, tower_command, TOWER_MTX) {
-        
-			walking_motor.on_speed_change = [this](uint8_t speed) {
-				tower.walking_speed_changed(speed);
-			};
-    }
 };
+
+PatrolRobot::PatrolRobot() :
+	walking_motor ( ePortM::PORT_A, WALKING_MOTOR_MTX ),
+	walker        ( walking_motor, ePortS::PORT_1 ),
+    scanner       ( ePortS::PORT_2 ),
+    tower         ( ePortM::PORT_B, ePortM::PORT_C, TOWER_MTX ),
+	control       ( CONTROL_MTX )
+{
+	walking_motor.on_speed_change = [this](uint8_t speed) {
+		tower.walking_speed_changed(speed);
+	};
+
+	walker.on_position_change = [this] (PositionMessage m) {
+		tower   .received_position_message ( m );
+		scanner .received_position_message ( m );
+	};
+
+	scanner.on_target = [this](Target t){
+		control.here_is_a_target ( t );
+	};
+}
+
+void PatrolRobot::every_1s()
+{
+	control.every_1s();
+}
+
+void PatrolRobot::every_1ms()
+{
+	tower.every_1ms();
+	walking_motor.every_1ms();
+}
 
 PatrolRobot* robot;
 
@@ -60,21 +81,17 @@ void main_task(intptr_t unused) {
 	TowerMessage ev;
 	ev.command = TowerMessage::Command::LOCK;
 	ev.params.target = {5, 10};
-	robot->tower_command.invoke(ev);
+	robot->tower.received_command_message(ev);
 
     act_tsk(SCANNER_TASK);
 
-	ev3_sta_cyc ( TOWER_CYC  );
+	ev3_sta_cyc ( EVERY_1S  );
+	ev3_sta_cyc ( EVERY_1MS  );
+
 
     act_tsk(WALKER_TASK);
-	ev3_sta_cyc(Walker_SmoothMotor_cyc);
 
-	control_loop();
-}
-
-void walker_SmoothMotor_every_1ms()
-{
-	robot->walking_motor.every_1ms();
+	robot->control.loop();
 }
 
 void walker_task(intptr_t exinf) {
@@ -95,8 +112,13 @@ void scanner_task(intptr_t exinf) {
     }
 }
 
-void tower_every_1ms()
+void every_1ms()
 {
-	robot->tower.every_1ms();
+	robot->every_1ms();
+}
+
+void every_1s()
+{
+	robot->every_1s();
 }
 

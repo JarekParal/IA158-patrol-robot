@@ -7,19 +7,18 @@
 #include <functional>
 
 #include "Common.hpp"
-#include "Event.hpp"
-#include "Position.hpp"
 
 class Scanner {
 public:
-    Scanner(ePortS sonar_port, PositionEvent& position_event,
-            TargetEvent& target_event);
+    explicit Scanner(ePortS sonar_port);
     void task();
+
+	void received_position_message(PositionMessage msg);
+	Event<Target> on_target;
 
 private:
     enum class ScanningState { Init, Patrol };
 
-    void received_position_message(PositionMessage msg);
     void make_sample(int16_t position);
     void scan_changes(int16_t position);
     bool check_state(Direction dir);
@@ -28,7 +27,6 @@ private:
     static const size_t allowed_error = 1; // in cm
     ev3api::SonarSensor _sonar;
     ScanningState _state;
-    TargetEvent const& _target_event;
     std::array<int16_t, map_size> _depth_map;
 };
 

@@ -11,13 +11,12 @@
 
 Walker::Walker (
 		SmoothMotor & motor,
-		ePortS color_port,
-		PositionEvent const & position_event )
+		ePortS color_port )
 :
 	_motor          ( motor          ),
-	_color_sensor   ( color_port     ),
-	_position_event ( position_event )
+	_color_sensor   ( color_port     )
 {
+	on_position_change = nullptr;
 }
 
 void Walker::init()
@@ -61,7 +60,8 @@ void Walker::update_position(PositionColor c)
 		change_direction();
 
 	_current_color = c;
-	_position_event.invoke(PositionMessage{_current_direction, _current_position});
+	if ( on_position_change != nullptr )
+		on_position_change ( PositionMessage{_current_direction, _current_position} );
 }
 
 void Walker::step()

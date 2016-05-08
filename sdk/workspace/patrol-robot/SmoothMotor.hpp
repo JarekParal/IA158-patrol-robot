@@ -1,8 +1,8 @@
 #ifndef SMOOTH_MOTOR_HPP_
 #define SMOOTH_MOTOR_HPP_
 
-#include <functional>
 #include <Motor.h>
+#include "Common.hpp"
 
 class SmoothMotor
 {
@@ -19,7 +19,7 @@ class SmoothMotor
 
 		void every_1ms();
 
-		std::function<void(Speed_t)> on_speed_change;
+		Event<Speed_t> on_speed_change;
 
 	private:
 		void update_speed();

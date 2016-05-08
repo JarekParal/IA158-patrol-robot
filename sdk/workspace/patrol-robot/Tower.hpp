@@ -4,7 +4,6 @@
 #include <Port.h>
 #include <Motor.h>
 #include "Common.hpp"
-#include "Position.hpp"
 
 class Tower
 {
@@ -12,16 +11,15 @@ class Tower
 		Tower(
             ePortM rotation_port,
             ePortM fire_port,
-            PositionEvent& position_event,
-            TowerCommandEvent& command_event,
 			ID mutex_id);
 
 		void every_1ms();
 		void walking_speed_changed(uint8_t new_speed);
 
-	private:
 		void received_position_message(PositionMessage msg);
         void received_command_message(TowerMessage msg);
+
+	private:
 
         void update_position(double angle);
 		void update();

@@ -1,12 +1,9 @@
 #include "Scanner.hpp"
 
-Scanner::Scanner(ePortS sonar_port, PositionEvent& position_event,
-                 TargetEvent& target_event)
+Scanner::Scanner(ePortS sonar_port)
     : _sonar(sonar_port)
-    , _state(ScanningState::Init)
-    , _target_event(target_event) {
-    position_event.insert(
-            [this](PositionMessage msg) { received_position_message(msg); });
+    , _state(ScanningState::Init) {
+		on_target = nullptr;
 }
 
 void Scanner::task() {}
@@ -41,6 +38,8 @@ void Scanner::scan_changes(int16_t position) {
 
     if (expected - allowed_error > distance ||
         expected + allowed_error < distance) {
-        _target_event.invoke(Target{position, distance});
+
+		if ( on_target )
+			on_target ( Target{position, distance} );
     }
 }

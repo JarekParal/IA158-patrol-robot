@@ -4,8 +4,6 @@
 
 Tower::Tower(ePortM rotation_port,
              ePortM fire_port,
-             PositionEvent& position_event,
-             TowerCommandEvent& command_event,
 			 ID mutex_id)
     :
     _rotation_motor(rotation_port, false),
@@ -14,14 +12,6 @@ Tower::Tower(ePortM rotation_port,
     _follow_target(false)
 {
 	_mutex_id = mutex_id;
-
-	position_event.insert([this](PositionMessage msg) {
-		received_position_message(msg);
-	});
-
-    command_event.insert([this](TowerMessage msg) {
-        received_command_message(msg);
-    });
 
     _rotation_motor.setBrake(false);
     _rotation_motor.stop();
