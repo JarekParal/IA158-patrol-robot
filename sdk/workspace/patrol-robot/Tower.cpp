@@ -25,6 +25,9 @@ Tower::Tower(ePortM rotation_port,
 
     _rotation_motor.setBrake(false);
     _rotation_motor.stop();
+
+	walking_speed = 0;
+	walking_position = 0;
 }
 
 void Tower::every_1ms()
@@ -36,16 +39,27 @@ void Tower::every_1ms()
 
 void Tower::update()
 {
-
+	walking_position += walking_speed;
 }
 
 void Tower::walking_speed_changed(uint8_t new_speed)
 {
-
+	loc_mtx ( _mutex_id );
+	walking_speed = new_speed;
+	unl_mtx ( _mutex_id );
 }
 
 void Tower::received_position_message(PositionMessage msg)
 {
+	loc_mtx ( _mutex_id );
+	/*
+	 * Abychom mohli odhadnout, jaka je vzdalenost mezi dvema ctvereckami
+	 * v jednotkach [tick * rychlost]
+	 */
+	fprintf ( bt, "walking position: %d\n", walking_position );
+	walking_position = 0;
+	unl_mtx ( _mutex_id );
+
     if (!_follow_target)
         return;
 

@@ -36,6 +36,9 @@ class Tower
 
         const int32_t speed = 200;
         const double gear_ratio = 1.95;
+		int32_t walking_position; // in some small units
+		int8_t  walking_speed;
+
 };
 
 #endif // TOWER_HPP
