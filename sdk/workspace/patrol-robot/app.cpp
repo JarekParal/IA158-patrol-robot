@@ -73,7 +73,8 @@ void PatrolRobot::every_1ms()
 PatrolRobot* robot;
 
 void main_task(intptr_t unused) {
-    bt = fdopen(/*SIO_BT_FILENO*/ 5, "a+");
+//    bt = fdopen(/*SIO_BT_FILENO*/ 5, "a+");
+	bt = ev3_serial_open_file ( EV3_SERIAL_BT );
     assert(bt != NULL);
 
     robot = new PatrolRobot;

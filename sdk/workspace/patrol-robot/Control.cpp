@@ -102,17 +102,74 @@ void Control::every_1s()
 	unl_mtx ( _mutex_id );
 }
 
+static bool is_prefix_of ( const char * prefix, const char * string )
+{
+	while ( *prefix == *string )
+	{
+		if ( *prefix == '\0' )
+			return true;
+
+		prefix++;
+		string++;
+	}
+
+	if ( *prefix == '\0' )
+		return true;
+
+	return false;
+}
+
+static bool read_line(char * buf, size_t bufsz)
+{
+	while ( true ) {
+		char c = fgetc ( bt );
+		fputc ( c, bt ); // echo
+		if ( (c == '\n') || (c == '\r') )
+		{
+			if (bufsz > 0)
+			{
+				*buf = '\0';
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		if ( bufsz > 0 )
+		{
+			*buf = c;
+			buf++;
+			bufsz--;
+		}
+	}
+}
+
 void Control::loop()
 {
 	fprintf ( bt, "Robot started\n" );
-	fprintf ( bt, 	"Commands:"
+	fprintf ( bt, 	"Commands:\n"
 					"\tnext\n"
 					"\tshoot [seconds]\n"
-					""
+					"\tcalibrate-tower <angle>\n"
 			
 			);
 
 	while(true)
-		tslp_tsk(50);
+	{
+		fprintf( bt, "> " );
+		char buff[80];
+		buff[0] = '\0';
+		read_line (buff, 80 );
+
+		fprintf ( bt, "got: %s\n", buff );
+
+		if ( is_prefix_of ( "calibrate-tower", buff ) )
+		{
+			fprintf ( bt, "OK, we will calibrate tower\n" );
+		} else if ( is_prefix_of ( "", buff) )
+		{
+
+		}
+	}
 }
 
