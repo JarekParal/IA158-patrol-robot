@@ -10,6 +10,7 @@ class SmoothMotor
 		SmoothMotor ( ePortM motor_port, ID mutex_id );
 		using Milliseconds_t = uint16_t;
 		using Speed_t = int8_t;
+		using SpeedDiff_t = int16_t;
 
 		/* @pre time_to_change >= 1 */
 		void set_speed ( Speed_t speed, Milliseconds_t time_to_change );
@@ -20,6 +21,7 @@ class SmoothMotor
 
 	private:
 		void update_speed();
+		static bool valid(Speed_t speed);
 
 		Speed_t _current_speed;
 		Speed_t _last_stable_speed;
