@@ -13,17 +13,22 @@ class Tower
             ePortM rotation_port,
             ePortM fire_port,
             PositionEvent& position_event,
-            TowerCommandEvent& command_event);
-		void task();
+            TowerCommandEvent& command_event,
+			ID mutex_id);
+
+		void every_1ms();
+		void walking_speed_changed(uint8_t new_speed);
 
 	private:
 		void received_position_message(PositionMessage msg);
         void received_command_message(TowerMessage msg);
 
         void update_position(double angle);
+		void update();
 
         ev3api::Motor _rotation_motor;
         ev3api::Motor _fire_motor;
+		ID _mutex_id;
 
         int32_t _direction;
         bool _follow_target;

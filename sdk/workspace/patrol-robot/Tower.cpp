@@ -5,13 +5,16 @@
 Tower::Tower(ePortM rotation_port,
              ePortM fire_port,
              PositionEvent& position_event,
-             TowerCommandEvent& command_event)
+             TowerCommandEvent& command_event,
+			 ID mutex_id)
     :
     _rotation_motor(rotation_port, false),
     _fire_motor(fire_port, true, MEDIUM_MOTOR),
     _direction(0),
     _follow_target(false)
 {
+	_mutex_id = mutex_id;
+
 	position_event.insert([this](PositionMessage msg) {
 		received_position_message(msg);
 	});
@@ -24,7 +27,19 @@ Tower::Tower(ePortM rotation_port,
     _rotation_motor.stop();
 }
 
-void Tower::task()
+void Tower::every_1ms()
+{
+	loc_mtx ( _mutex_id );
+	update();
+	unl_mtx ( _mutex_id );
+}
+
+void Tower::update()
+{
+
+}
+
+void Tower::walking_speed_changed(uint8_t new_speed)
 {
 
 }

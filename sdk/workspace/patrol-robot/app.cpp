@@ -41,12 +41,11 @@ struct PatrolRobot {
         : walking_motor(ePortM::PORT_A, Walker_SmoothMotor_MUTEX),
 			walker(walking_motor, ePortS::PORT_1, position_event)
         , scanner(ePortS::PORT_2, position_event, target_event)
-        , tower(ePortM::PORT_B, ePortM::PORT_C, position_event, tower_command) {
-        // Temp
-        TowerMessage ev;
-        ev.command = TowerMessage::Command::LOCK;
-        ev.params.target = {5, 10};
-        tower_command.invoke(ev);
+        , tower(ePortM::PORT_B, ePortM::PORT_C, position_event, tower_command, TOWER_MTX) {
+        
+			walking_motor.on_speed_change = [this](uint8_t speed) {
+				tower.walking_speed_changed(speed);
+			};
     }
 };
 
@@ -58,10 +57,18 @@ void main_task(intptr_t unused) {
 
     robot = new PatrolRobot;
 
+	TowerMessage ev;
+	ev.command = TowerMessage::Command::LOCK;
+	ev.params.target = {5, 10};
+	robot->tower_command.invoke(ev);
+
     act_tsk(SCANNER_TASK);
-    act_tsk(TOWER_TASK);
+
+	ev3_sta_cyc ( TOWER_CYC  );
+
     act_tsk(WALKER_TASK);
 	ev3_sta_cyc(Walker_SmoothMotor_cyc);
+
 	control_loop();
 }
 
@@ -88,9 +95,8 @@ void scanner_task(intptr_t exinf) {
     }
 }
 
-void tower_task(intptr_t exinf) {
-    while (true) {
-        robot->tower.task();
-        tslp_tsk(50);
-    }
+void tower_every_1ms()
+{
+	robot->tower.every_1ms();
 }
+

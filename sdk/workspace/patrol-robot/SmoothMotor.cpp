@@ -1,5 +1,4 @@
 #include "SmoothMotor.hpp"
-
 		
 SmoothMotor::SmoothMotor ( ePortM motor_port, ID mutex_id ) :
 	_motor ( motor_port ),
@@ -10,6 +9,9 @@ SmoothMotor::SmoothMotor ( ePortM motor_port, ID mutex_id ) :
 	_current_speed = 0;
 	_desired_speed = 0;
 	_last_stable_speed = 0;
+
+
+	on_speed_change = nullptr;
 }
 
 bool SmoothMotor::valid ( Speed_t speed )
@@ -48,22 +50,21 @@ void SmoothMotor::update_speed()
 		current_speed = _desired_speed;
 	}
 
-	if ( current_speed > 0 )
-		assert ( current_speed < 20 );
-
-	if ( current_speed < 0 )
-		assert ( current_speed > -20 );
-
-	if ( current_speed != _current_speed )
-	{
-		_motor.setPWM(current_speed);
-		_current_speed = current_speed;
-	}
+	_current_speed = current_speed;
 }
 
 void SmoothMotor::every_1ms()
 {
+	Speed_t old_speed = _current_speed;
+
 	loc_mtx( _mutex_id );
 	update_speed ();
 	unl_mtx ( _mutex_id );
+
+	if ( _current_speed != old_speed )
+	{
+		_motor.setPWM ( _current_speed );
+		if ( on_speed_change )
+			on_speed_change ( _current_speed );
+	}
 }

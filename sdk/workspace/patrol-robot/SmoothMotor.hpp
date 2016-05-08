@@ -1,8 +1,8 @@
 #ifndef SMOOTH_MOTOR_HPP_
 #define SMOOTH_MOTOR_HPP_
 
+#include <functional>
 #include <Motor.h>
-#include <atomic>
 
 class SmoothMotor
 {
@@ -19,18 +19,22 @@ class SmoothMotor
 
 		void every_1ms();
 
+		std::function<void(Speed_t)> on_speed_change;
+
 	private:
 		void update_speed();
 		static bool valid(Speed_t speed);
 
-		Speed_t _current_speed;
+		ev3api::Motor _motor;
+		ID            _mutex_id;
+
+		// < protected by _mutex_id >
 		Speed_t _last_stable_speed;
 		Speed_t _desired_speed;
 		Milliseconds_t _time_to_change;
 		Milliseconds_t _current_time;
-
-		ev3api::Motor _motor;
-		ID            _mutex_id;
+		Speed_t _current_speed;
+		// </protected by _mutex_id >
 };
 
 

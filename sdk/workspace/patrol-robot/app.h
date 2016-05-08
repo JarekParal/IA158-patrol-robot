@@ -82,9 +82,11 @@
 extern "C" {
 #endif
 void main_task(intptr_t exinf);
-void walker_task(intptr_t exinf);
 void scanner_task(intptr_t exinf);
-void tower_task(intptr_t exinf);
+
+void tower_every_1ms();
+
+void walker_task(intptr_t exinf);
 void walker_SmoothMotor_every_1ms();
 #ifdef __cplusplus
 }
