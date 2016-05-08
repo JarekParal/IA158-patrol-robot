@@ -61,12 +61,19 @@ void Tower::received_position_message(PositionMessage msg)
     update_position(angle);
 }
 
+void Tower::lock_at ( Target target )
+{
+	loc_mtx ( _mutex_id );
+	_target = target;
+	_follow_target = true;
+	unl_mtx ( _mutex_id );
+}
+
 void Tower::received_command_message(TowerMessage msg)
 {
     switch(msg.command) {
     case TowerMessage::Command::LOCK:
-        _target = msg.params.target;
-        _follow_target = true;
+		lock_at ( msg.params.target );
         break;
     case TowerMessage::Command::UNLOCK:
         _follow_target = false;

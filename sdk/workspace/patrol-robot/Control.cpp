@@ -4,6 +4,10 @@
 TargetList::TargetList()
 {
 	_max_id = 0;
+	for ( TargetItem & i : _targets )
+	{
+		i.valid = false;
+	}
 }
 
 TargetList::Targets const & TargetList::targets() const
@@ -33,7 +37,7 @@ void TargetList::update ( Target t )
 		{
 			i.t.distance = t.distance;
 			i.last_seen = now;
-			
+			return;
 		}
 	}
 
@@ -68,7 +72,7 @@ void TargetList::remove_old_targets()
 			continue;
 
 		// Keep only new targets
-		if ( (now >= i.last_seen ) && ( now - i.last_seen < 10000) )
+		if ( (now >= i.last_seen ) && ( now - i.last_seen < 60000) )
 			continue;
 
 		i.valid = false;
@@ -90,6 +94,7 @@ Control::Control ( ID mutex_id, Tower & tower ) :
 	_mutex_id = mutex_id;
 }
 
+// TODO: Support long 'ScannedTargets'
 void Control::here_is_a_target ( Target t )
 {
 	loc_mtx ( _mutex_id );
@@ -102,6 +107,30 @@ void Control::every_1s()
 	loc_mtx ( _mutex_id );
 	_target_list.remove_old_targets();
 	unl_mtx ( _mutex_id );
+}
+
+static void print ( FILE * fw, TargetItem const & item, SYSTIM now )
+{
+	fprintf ( fw, "{ ID: %d, x: %d, y: %d, last_seen: %.3f}",
+			item.id, item.t.position, item.t.distance, double(now - item.last_seen) / 1000 );
+}
+
+static void print ( FILE *fw, TargetList const & tl )
+{
+	SYSTIM now;
+	get_tim ( &now );
+
+	fprintf ( fw, "{\n" );
+	auto const & targets = tl.targets();
+	for ( TargetItem const & item : targets )
+	{
+		if ( !item.valid )
+			continue;
+		fprintf ( fw, "\t" );
+		print   ( fw, item, now );
+		fprintf ( fw, "\n" );
+	}
+	fprintf ( fw, "}\n");
 }
 
 static bool is_prefix_of ( const char * prefix, const char * string )
@@ -151,6 +180,25 @@ static bool read_line(char * buf, size_t bufsz)
 	}
 }
 
+void Control::lock_target ( TargetId id )
+{
+	loc_mtx ( _mutex_id );
+
+	for ( TargetItem const & it : _target_list.targets() )
+	{
+		if ( it.valid && (it.id == id) )
+		{
+			Target t = it.t;
+			unl_mtx ( _mutex_id );
+			_tower.lock_at ( t );
+			return;
+		}
+	}
+
+	unl_mtx ( _mutex_id );
+	return;
+}
+
 void Control::loop()
 {
 	fprintf ( bt, "Robot started\n" );
@@ -158,6 +206,7 @@ void Control::loop()
 					"\tnext\n"
 					"\tshoot [seconds]\n"
 					"\tcalibrate-tower <angle>\n"
+					"\tlist\n"
 			
 			);
 
@@ -173,7 +222,7 @@ void Control::loop()
 			continue;
 		}
 
-		fprintf ( bt, "got: %s\n", buff );
+		fputc ( '\n', bt );
 
 		if ( is_prefix_of ( "calibrate-tower", buff ) )
 		{
@@ -183,9 +232,16 @@ void Control::loop()
 				_tower.calibrate(angle);
 			else
 				fprintf ( bt, "usage: calibrate-tower 45\n" );
-		} else if ( is_prefix_of ( "", buff) )
+		} else if ( is_prefix_of ( "list", buff) )
 		{
-
+			print ( bt, _target_list );
+		} else if ( is_prefix_of ( "lock", buff ) )
+		{
+			TargetId target_id;
+			if ( 1 == sscanf ( buff, "lock %u", &target_id ) )
+				lock_target ( target_id );
+			else
+				fprintf ( bt, "usage: lock 12\n" );
 		}
 	}
 }

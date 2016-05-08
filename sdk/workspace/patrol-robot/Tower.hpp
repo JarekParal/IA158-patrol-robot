@@ -18,6 +18,7 @@ class Tower
 
 		void received_position_message(PositionMessage msg);
         void received_command_message(TowerMessage msg);
+		void lock_at ( Target target );
 		
 		void calibrate(int16_t angle);
 

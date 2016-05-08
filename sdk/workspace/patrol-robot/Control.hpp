@@ -42,6 +42,8 @@ class Control
 		void here_is_a_target ( Target t );
 		void every_1s();
 
+		void lock_target ( TargetId id );
+
 	private:
 		TargetList _target_list;
 		ID         _mutex_id;
