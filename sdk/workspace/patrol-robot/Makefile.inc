@@ -1,6 +1,6 @@
 SRCLANG := c++
 
-APPL_CXXOBJS += Walker.o Scanner.o Tower.o Control.o
+APPL_CXXOBJS += Walker.o Scanner.o Tower.o Control.o SmoothMotor.o
 APPL_COBJS += 
 
 ifdef CONFIG_EV3RT_APPLICATION

@@ -18,6 +18,7 @@
 #include "Scanner.hpp"
 #include "Tower.hpp"
 #include "Control.hpp"
+#include "SmoothMotor.hpp"
 
 extern "C" {
 void* __dso_handle = NULL;
@@ -31,12 +32,14 @@ struct PatrolRobot {
     TowerCommandEvent tower_command;
     TargetEvent target_event;
 
+	SmoothMotor walking_motor;
     Walker walker;
     Scanner scanner;
     Tower tower;
 
     PatrolRobot()
-        : walker(ePortM::PORT_A, ePortS::PORT_1, position_event)
+        : walking_motor(ePortM::PORT_A, Walker_SmoothMotor_MUTEX),
+			walker(walking_motor, ePortS::PORT_1, position_event)
         , scanner(ePortS::PORT_2, position_event, target_event)
         , tower(ePortM::PORT_B, ePortM::PORT_C, position_event, tower_command) {
         // Temp
@@ -58,7 +61,13 @@ void main_task(intptr_t unused) {
     act_tsk(SCANNER_TASK);
     act_tsk(TOWER_TASK);
     act_tsk(WALKER_TASK);
+	ev3_sta_cyc(Walker_SmoothMotor_cyc);
 	control_loop();
+}
+
+void walker_SmoothMotor_every_1ms()
+{
+	robot->walking_motor.every_1ms();
 }
 
 void walker_task(intptr_t exinf) {

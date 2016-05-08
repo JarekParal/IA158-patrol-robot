@@ -10,11 +10,11 @@
 
 
 Walker::Walker (
-		ePortM motor_port,
+		SmoothMotor & motor,
 		ePortS color_port,
 		PositionEvent const & position_event )
 :
-	_motor          ( motor_port     ),
+	_motor          ( motor          ),
 	_color_sensor   ( color_port     ),
 	_position_event ( position_event )
 {
@@ -25,7 +25,7 @@ void Walker::init()
 	_current_position  = 0;
 	_current_direction = Direction::Right;
 	_current_color     = PositionColor::Blue;
-	_motor.setPWM(abs_speed);
+	_motor.set_speed ( +abs_speed, 1000 );
 }
 
 Walker::PositionColor Walker::next_color(rgb_raw_t const & rgb) const
@@ -79,12 +79,12 @@ void Walker::change_direction()
 	{
 		case Direction::Right:
 			_current_direction = Direction::Left;
-			_motor.setPWM(-abs_speed);
+			_motor.set_speed ( -abs_speed, 1000 );
 			break;
 
 		case Direction::Left:
 			_current_direction = Direction::Right;
-			_motor.setPWM(abs_speed);
+			_motor.set_speed ( +abs_speed, 1000 );
 			break;
 	}
 }

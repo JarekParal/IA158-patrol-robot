@@ -5,11 +5,12 @@
 #include <Motor.h>
 #include <ColorSensor.h>
 #include "Position.hpp"
+#include "SmoothMotor.hpp"
 
 class Walker
 {
 	public:
-		Walker ( ePortM motor_port,
+		Walker ( SmoothMotor & motor,
 				 ePortS color_port,
 				 PositionEvent const & position_event
 				 );
@@ -33,7 +34,7 @@ class Walker
 		void update_led();
 		PositionColor candidate_color(PositionColor c);
 
-		ev3api::Motor   _motor;
+		SmoothMotor     & _motor;
 		ev3api::ColorSensor _color_sensor;
 		PositionEvent const & _position_event;
 
