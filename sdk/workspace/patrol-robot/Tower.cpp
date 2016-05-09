@@ -57,7 +57,7 @@ void Tower::received_position_message(PositionMessage msg)
     double diff = msg.position - _target.x;
     double dist = _target.y;
 
-    double angle = tan(diff / dist) * 180.0 / M_PI;
+    double angle = tan(dist / diff) * 180.0 / M_PI;
     update_position(angle);
 }
 

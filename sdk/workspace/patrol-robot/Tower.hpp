@@ -37,9 +37,9 @@ class Tower
         Coordinates _target;
 
         const int32_t speed = 200;
-        const double gear_ratio = 1.95;
+        const double gear_ratio = 4.5;
         const double shots_per_sec = 1;
-        const int16_t degrees_per_shot = 30;
+        const int16_t degrees_per_shot = 130;
 		int32_t walking_position; // in some small units
 		int8_t  walking_speed;
 
