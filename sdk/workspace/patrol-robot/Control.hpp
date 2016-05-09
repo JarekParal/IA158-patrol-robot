@@ -39,7 +39,7 @@ class Control
 	public:
 		explicit Control ( ID mutex_id, Tower & tower );
 		void loop();
-		void here_is_a_target ( Target t );
+		void here_is_a_target ( ScannedTarget t );
 		void every_1s();
 
 		void lock_target ( TargetId id );

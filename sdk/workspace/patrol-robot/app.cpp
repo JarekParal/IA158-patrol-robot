@@ -4,14 +4,17 @@
  * This is a program used to test the whole platform.
  */
 
-#include "ev3api.h"
-#include "app.h"
 #include <unistd.h>
 #include <ctype.h>
+#include <utility> // std::move
+
+#include "ev3api.h"
+#include "app.h"
 #include <Port.h>
 #include <Motor.h>
 #include <Clock.h>
 
+// Project
 #include "Common.hpp"
 #include "Walker.hpp"
 #include "Scanner.hpp"
@@ -54,8 +57,8 @@ PatrolRobot::PatrolRobot() :
 		scanner .received_position_message ( m );
 	};
 
-	scanner.on_target = [this](Target t){
-		control.here_is_a_target ( t );
+	scanner.on_target = [this](ScannedTarget t){
+		control.here_is_a_target ( std::move( t ) );
 	};
 }
 

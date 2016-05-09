@@ -95,10 +95,14 @@ Control::Control ( ID mutex_id, Tower & tower ) :
 }
 
 // TODO: Support long 'ScannedTargets'
-void Control::here_is_a_target ( Target t )
+void Control::here_is_a_target ( ScannedTarget t )
 {
+	Target target;
+	target.position = t.from();
+	target.distance = t.distances[0];
+
 	loc_mtx ( _mutex_id );
-	_target_list.update ( t );
+	_target_list.update ( target );
 	unl_mtx ( _mutex_id );
 }
 
