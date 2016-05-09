@@ -21,6 +21,8 @@ private:
     void make_sample(Position position);
     void scan_changes(Position position, Direction current_dir);
 
+    Distance median_distance(std::vector<int16_t>& samples);
+
     bool has_moved(Position position, Distance sample) const;
 
     struct ScannedTarget {
@@ -51,6 +53,7 @@ private:
 
     static const size_t map_size = 256;
     static const size_t allowed_error = 1; // in cm
+    static const unsigned sample_precision = 20; // number of samples
 
     ev3api::SonarSensor _sonar;
     std::array<bool, map_size> _scanned_map;
