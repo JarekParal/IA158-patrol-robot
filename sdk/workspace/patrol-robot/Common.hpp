@@ -42,13 +42,6 @@ struct ScannedTarget {
 	Position to() const { return _from + distances.size(); }
 };
 
-
-struct Target {
-    Position position;
-    Distance distance;
-};
-
-
 struct TowerMessage {
     enum class Command { LOCK, UNLOCK, FIRE };
     Command command;
