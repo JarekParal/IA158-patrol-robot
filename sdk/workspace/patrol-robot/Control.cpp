@@ -207,10 +207,11 @@ void Control::loop()
 {
 	fprintf ( bt, "Robot started\n" );
 	fprintf ( bt, 	"Commands:\n"
-					"\tnext\n"
-					"\tshoot [seconds]\n"
+					"\tshoot [rounds]\n"
 					"\tcalibrate-tower <angle>\n"
 					"\tlist\n"
+					"\tlock\n"
+					"\tunlock\n"
 			
 			);
 
@@ -228,24 +229,34 @@ void Control::loop()
 
 		fputc ( '\n', bt );
 
-		if ( is_prefix_of ( "calibrate-tower", buff ) )
-		{
+		if (is_prefix_of("calibrate-tower", buff)) {
 			fprintf ( bt, "OK, we will calibrate tower\n" );
 			int angle;
-			if (1 == sscanf ( buff, "calibrate-tower %d", &angle ) )
+			if (1 == sscanf(buff, "calibrate-tower %d", &angle))
 				_tower.calibrate(angle);
 			else
-				fprintf ( bt, "usage: calibrate-tower 45\n" );
-		} else if ( is_prefix_of ( "list", buff) )
-		{
-			print ( bt, _target_list );
-		} else if ( is_prefix_of ( "lock", buff ) )
-		{
+				fprintf(bt, "usage: calibrate-tower 45\n");
+		}
+		else if (is_prefix_of("list", buff)) {
+			print(bt, _target_list);
+		}
+		else if (is_prefix_of("lock", buff)) {
 			TargetId target_id;
-			if ( 1 == sscanf ( buff, "lock %u", &target_id ) )
-				lock_target ( target_id );
+			if (1 == sscanf(buff, "lock %u", &target_id))
+				lock_target(target_id);
 			else
-				fprintf ( bt, "usage: lock 12\n" );
+				fprintf(bt, "usage: lock 12\n");
+		}
+		else if (is_prefix_of("unlock", buff)) {
+			_tower.unlock();
+		} 
+		else if (is_prefix_of("shoot", buff)) {
+			fprintf (bt, "OK, shoot!\n");
+			int shots;
+			if (1 == sscanf (buff, "shoot %d", &shots))
+				_tower.shoot(shots);
+			else
+				_tower.shoot(1);
 		}
 	}
 }

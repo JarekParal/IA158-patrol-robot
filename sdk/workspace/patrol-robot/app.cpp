@@ -82,16 +82,10 @@ void main_task(intptr_t unused) {
 
     robot = new PatrolRobot;
 
-	TowerMessage ev;
-	ev.command = TowerMessage::Command::LOCK;
-	ev.params.target = {5, 10};
-	robot->tower.received_command_message(ev);
-
     act_tsk(SCANNER_TASK);
 
 	ev3_sta_cyc ( EVERY_1S  );
 	ev3_sta_cyc ( EVERY_1MS  );
-
 
     act_tsk(WALKER_TASK);
 
