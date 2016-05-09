@@ -22,7 +22,7 @@ TargetId TargetList::next_id()
 	return id;
 }
 
-void TargetList::update ( Target t )
+void TargetList::update ( Coordinates coordinates )
 {
 	SYSTIM now;
 	get_tim ( &now );
@@ -33,9 +33,9 @@ void TargetList::update ( Target t )
 		if ( !i.valid )
 			continue;
 
-		if ( i.t.position == t.position )
+		if ( i.coordinates.x == coordinates.x )
 		{
-			i.t.distance = t.distance;
+			i.coordinates.y = coordinates.y;
 			i.last_seen = now;
 			return;
 		}
@@ -49,7 +49,7 @@ void TargetList::update ( Target t )
 			continue;
 
 		i.id = next_id();
-		i.t = t;
+		i.coordinates = coordinates;
 		i.valid = true;
 		i.last_seen = now;
 		return;
@@ -97,12 +97,12 @@ Control::Control ( ID mutex_id, Tower & tower ) :
 // TODO: Support long 'ScannedTargets'
 void Control::here_is_a_target ( ScannedTarget t )
 {
-	Target target;
-	target.position = t.from();
-	target.distance = t.distances[0];
+	Coordinates c;
+	c.x = t.from();
+	c.y = t.distances[0];
 
 	loc_mtx ( _mutex_id );
-	_target_list.update ( target );
+	_target_list.update ( c );
 	unl_mtx ( _mutex_id );
 }
 
@@ -116,7 +116,7 @@ void Control::every_1s()
 static void print ( FILE * fw, TargetItem const & item, SYSTIM now )
 {
 	fprintf ( fw, "{ ID: %d, x: %d, y: %d, last_seen: %.3f}",
-			item.id, item.t.position, item.t.distance, double(now - item.last_seen) / 1000 );
+			item.id, item.coordinates.x, item.coordinates.y, double(now - item.last_seen) / 1000 );
 }
 
 static void print ( FILE *fw, TargetList const & tl )
@@ -192,9 +192,9 @@ void Control::lock_target ( TargetId id )
 	{
 		if ( it.valid && (it.id == id) )
 		{
-			Target t = it.t;
+			Coordinates c = it.coordinates;
 			unl_mtx ( _mutex_id );
-			_tower.lock_at ( t );
+			_tower.lock_at ( c );
 			return;
 		}
 	}

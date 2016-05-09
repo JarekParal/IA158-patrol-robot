@@ -8,7 +8,7 @@ using TargetId = uint8_t;
 struct TargetItem
 {
 	TargetId id;
-	Target t;
+	Coordinates coordinates;
 	bool valid;
 	SYSTIM last_seen;
 };
@@ -19,7 +19,7 @@ class TargetList
 		TargetList();
 		using Targets = std::array<TargetItem, 5>;
 
-		void update ( Target t );
+		void update ( Coordinates t );
 		void remove_old_targets();
 		void remove ( TargetId id );
 

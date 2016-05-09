@@ -53,7 +53,7 @@ struct TowerMessage {
     enum class Command { LOCK, UNLOCK, FIRE };
     Command command;
     union  {
-        Target target;
+        Coordinates target;
         uint16_t shot_number;
     } params;
 };
