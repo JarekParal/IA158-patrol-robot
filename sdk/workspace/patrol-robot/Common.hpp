@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <ctype.h>
 #include <functional>
+#include <vector>
 #include "ev3api.h"
 
 template < typename Message>
@@ -13,6 +14,12 @@ extern FILE *bt;
 using Position = int16_t;
 using Distance = int16_t;
 
+struct Coordinates
+{
+	int16_t x;
+	int16_t y;
+};
+
 enum class Direction { Left, Right };
 
 struct PositionMessage {
@@ -20,18 +27,11 @@ struct PositionMessage {
     Position position;
 };
 
-struct Target {
-    Position position;
-    Distance distance;
-};
-
-using TargetEvent = Event<Target>;
-
 struct TowerMessage {
     enum class Command { LOCK, UNLOCK, FIRE };
     Command command;
     union  {
-        Target target;
+        Coordinates target;
         uint16_t shot_number;
     } params;
 };

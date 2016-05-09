@@ -17,8 +17,9 @@ class Tower
 		void walking_speed_changed(uint8_t new_speed);
 
 		void received_position_message(PositionMessage msg);
-        void received_command_message(TowerMessage msg);
-		void lock_at ( Target target );
+		void lock_at(Coordinates coordinates);
+        void unlock();
+        void shoot(uint8_t shot_number);
 		
 		void calibrate(int16_t angle);
 
@@ -33,10 +34,12 @@ class Tower
 
         int32_t _direction;
         bool _follow_target;
-        Target _target;
+        Coordinates _target;
 
         const int32_t speed = 200;
-        const double gear_ratio = 1.95;
+        const double gear_ratio = 4.5;
+        const double shots_per_sec = 1;
+        const int16_t degrees_per_shot = 130;
 		int32_t walking_position; // in some small units
 		int8_t  walking_speed;
 

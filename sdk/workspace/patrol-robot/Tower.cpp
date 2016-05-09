@@ -54,14 +54,14 @@ void Tower::received_position_message(PositionMessage msg)
         return;
 
     // Compute angle
-    double diff = msg.position - _target.position;
-    double dist = _target.distance;
+    double diff = msg.position - _target.x;
+    double dist = _target.y;
 
-    double angle = tan(diff / dist) * 180.0 / M_PI;
+    double angle = tan(dist / diff) * 180.0 / M_PI;
     update_position(angle);
 }
 
-void Tower::lock_at ( Target target )
+void Tower::lock_at(Coordinates target)
 {
 	loc_mtx ( _mutex_id );
 	_target = target;
@@ -69,19 +69,15 @@ void Tower::lock_at ( Target target )
 	unl_mtx ( _mutex_id );
 }
 
-void Tower::received_command_message(TowerMessage msg)
+void Tower::unlock() {
+    _follow_target = false;
+}
+
+void Tower::shoot(uint8_t shot_number)
 {
-    switch(msg.command) {
-    case TowerMessage::Command::LOCK:
-		lock_at ( msg.params.target );
-        break;
-    case TowerMessage::Command::UNLOCK:
-        _follow_target = false;
-        break;
-    case TowerMessage::Command::FIRE:
-        //ToDo
-        break;
-    }
+    uint32_t angle = shot_number * degrees_per_shot;
+    uint32_t speed = degrees_per_shot * shots_per_sec;
+    _fire_motor.rotate(angle, speed, false);
 }
 
 void Tower::update_position(double angle) {
