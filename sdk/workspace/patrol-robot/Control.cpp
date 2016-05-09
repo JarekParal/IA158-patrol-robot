@@ -1,6 +1,27 @@
 #include "Tower.hpp"
 #include "Control.hpp"
 
+static void print_tabs ( FILE * fw, size_t tabs )
+{
+	while ( tabs-- )
+		fputc ( '\t', fw );
+}
+
+static void print ( FILE * fw, size_t tabs, ScannedTarget const & target )
+{
+	print_tabs ( fw, tabs );
+	fprintf ( fw, "{ from: %d, distances: [ ", target.from() );
+	for ( size_t i = 0; i < target.distances.size(); i++ )
+	{
+		if ( i != 0 )
+			fprintf ( fw, ", " );
+		fprintf ( fw, " %d", target.distances[i] );
+
+	}
+	fprintf ( fw, "] }\n" );
+}
+
+
 TargetList::TargetList()
 {
 	_max_id = 0;
@@ -22,7 +43,23 @@ TargetId TargetList::next_id()
 	return id;
 }
 
-void TargetList::update ( Coordinates coordinates )
+void TargetList::insert ( TargetItem & item, ScannedTarget target, SYSTIM now )
+{
+	fprintf ( bt, "updating %u:\n", item.id );
+	print ( bt, 1, target );
+	strip ( target );
+	if ( target.distances.size() == 0 )
+	{
+		item.valid = false;
+		return;
+	}
+
+	item.valid = true;
+	item.target = std::move ( target );
+	item.last_seen = now;
+}
+
+void TargetList::update ( ScannedTarget target )
 {
 	SYSTIM now;
 	get_tim ( &now );
@@ -33,12 +70,11 @@ void TargetList::update ( Coordinates coordinates )
 		if ( !i.valid )
 			continue;
 
-		if ( i.coordinates.x == coordinates.x )
-		{
-			i.coordinates.y = coordinates.y;
-			i.last_seen = now;
-			return;
-		}
+		if ( !match ( i.target, target ) )
+			continue;
+
+		insert ( i, std::move ( target ), now );
+		return;
 	}
 
 	// there is no such target in list
@@ -49,9 +85,7 @@ void TargetList::update ( Coordinates coordinates )
 			continue;
 
 		i.id = next_id();
-		i.coordinates = coordinates;
-		i.valid = true;
-		i.last_seen = now;
+		insert ( i, std::move ( target ), now );
 		return;
 	}
 
@@ -94,15 +128,10 @@ Control::Control ( ID mutex_id, Tower & tower ) :
 	_mutex_id = mutex_id;
 }
 
-// TODO: Support long 'ScannedTargets'
 void Control::here_is_a_target ( ScannedTarget t )
 {
-	Coordinates c;
-	c.x = t.from();
-	c.y = t.distances[0];
-
 	loc_mtx ( _mutex_id );
-	_target_list.update ( c );
+	_target_list.update ( std::move(t) );
 	unl_mtx ( _mutex_id );
 }
 
@@ -115,8 +144,10 @@ void Control::every_1s()
 
 static void print ( FILE * fw, TargetItem const & item, SYSTIM now )
 {
-	fprintf ( fw, "{ ID: %d, x: %d, y: %d, last_seen: %.3f}",
-			item.id, item.coordinates.x, item.coordinates.y, double(now - item.last_seen) / 1000 );
+	fprintf ( fw, "{ ID: %d, last_seen: %.3f, target:",
+			item.id, double (now - item.last_seen) / 1000 );
+	print ( fw, 1, item.target );
+	fprintf ( fw, "}\n" );
 }
 
 static void print ( FILE *fw, TargetList const & tl )
@@ -192,9 +223,11 @@ void Control::lock_target ( TargetId id )
 	{
 		if ( it.valid && (it.id == id) )
 		{
-			Coordinates c = it.coordinates;
+			size_t mid = it.target.distances.size() / 2;
+			int16_t y = it.target.distances[mid];
+			int16_t x = it.target.from() + mid;
 			unl_mtx ( _mutex_id );
-			_tower.lock_at ( c );
+			_tower.lock_at ( Coordinates { x, y } );
 			return;
 		}
 	}
@@ -241,9 +274,9 @@ void Control::loop()
 			print(bt, _target_list);
 		}
 		else if (is_prefix_of("lock", buff)) {
-			TargetId target_id;
+			unsigned int target_id;
 			if (1 == sscanf(buff, "lock %u", &target_id))
-				lock_target(target_id);
+				lock_target(TargetId(target_id));
 			else
 				fprintf(bt, "usage: lock 12\n");
 		}

@@ -27,21 +27,6 @@ struct PositionMessage {
     Position position;
 };
 
-struct ScannedTarget {
-	ScannedTarget() = default;
-	ScannedTarget ( ScannedTarget const & orig ) = delete;
-	ScannedTarget ( ScannedTarget && old ) = default;
-	ScannedTarget & operator= ( ScannedTarget const & origin ) = delete;
-	ScannedTarget & operator= ( ScannedTarget && old ) = default;
-
-	Position _from;
-	Position _to;
-	std::vector<Distance> distances;
-
-	Position from() const { return _from; }
-	Position to() const { return _from + distances.size(); }
-};
-
 struct TowerMessage {
     enum class Command { LOCK, UNLOCK, FIRE };
     Command command;

@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "Common.hpp"
+#include "Target.hpp"
 
 class Scanner {
 public:
