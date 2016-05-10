@@ -24,7 +24,7 @@ void Walker::init()
 	_current_position  = 0;
 	_current_direction = Direction::Right;
 	_current_color     = PositionColor::Blue;
-	_motor.set_speed ( +abs_speed, 1000 );
+	_motor.set_speed ( +abs_speed, wheel_response_time );
 }
 
 Walker::PositionColor Walker::next_color(rgb_raw_t const & rgb) const
@@ -79,12 +79,12 @@ void Walker::change_direction()
 	{
 		case Direction::Right:
 			_current_direction = Direction::Left;
-			_motor.set_speed ( -abs_speed, 1000 );
+			_motor.set_speed ( -abs_speed, wheel_response_time );
 			break;
 
 		case Direction::Left:
 			_current_direction = Direction::Right;
-			_motor.set_speed ( +abs_speed, 1000 );
+			_motor.set_speed ( +abs_speed, wheel_response_time );
 			break;
 	}
 }
