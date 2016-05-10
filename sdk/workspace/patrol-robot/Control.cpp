@@ -229,6 +229,7 @@ void Control::lock_target ( TargetId id )
 			int16_t y = it.target.distances[mid];
 			int16_t x = it.target.from() + mid;
 			unl_mtx ( _mutex_id );
+			fprintf ( bt, "locking at [%d, %d]\n", x, y );
 			_tower.lock_at ( Coordinates { x, y } );
 			return;
 		}
