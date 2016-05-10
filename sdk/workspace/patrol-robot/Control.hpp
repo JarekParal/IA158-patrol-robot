@@ -32,6 +32,13 @@ class TargetList
 
 		Targets _targets;
 		TargetId _max_id;
+
+		using Tone = uint16_t;
+		static const Tone tone_new_target     = 1000;
+		static const Tone tone_new_target_len = 2000;
+
+		static const Tone tone_updated_target     = 2000;
+		static const Tone tone_updated_target_len =  500;
 };
 
 class Tower;
