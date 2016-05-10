@@ -60,6 +60,7 @@ Distance Scanner::median_distance(std::vector<int16_t>& samples) {
 }
 
 void Scanner::scan_changes(Position position, Direction current_dir) {
+	assert ( position >= 0 );
     assert(_scanned_map[position]);
 
     Distance distance = make_sample(position);
@@ -70,21 +71,29 @@ void Scanner::scan_changes(Position position, Direction current_dir) {
             if (moved && !changed_direction) {
                 // still scanning target
                 scanned_target.distances.push_back(distance);
-                _depth_map[position] = distance; // update map
+                //_depth_map[position] = distance; // update map
                 // fprintf(bt, "Update Position: %d, Distance: %d\n", position,
                 //        _depth_map[position]);
             } else { // target ended
                 assert(!scanned_target.distances.empty());
 
-                // Reorder them to grow
-                if (_direction == Direction::Left) {
-                    scanned_target._from -= scanned_target.distances.size();
-                    std::reverse(scanned_target.distances.begin(),
-                                 scanned_target.distances.end());
-                }
+				if ( scanned_target.distances.size() >= min_target_size )
+				{
+					// Update map from target
+					for ( size_t i = 0; i < scanned_target.distances.size(); i++ )
+					{
+						_depth_map[scanned_target.from() + i] = scanned_target.distances[i];
+					}
+	                // Reorder them to grow
+    	            if (_direction == Direction::Left) {
+        	            scanned_target._from -= scanned_target.distances.size();
+            	        std::reverse(scanned_target.distances.begin(),
+                	                 scanned_target.distances.end());
+               		 }
 
-                if (on_target)
-                    on_target(std::move(scanned_target));
+        	        if (on_target)
+            	        on_target(std::move(scanned_target));
+				}
                 scanned_target = ScannedTarget();
                 detected_target = false;
             }

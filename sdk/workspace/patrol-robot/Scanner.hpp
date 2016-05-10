@@ -34,6 +34,7 @@ private:
     static const size_t map_size = 256;
     static const size_t allowed_error = 10;      // in cm
     static const unsigned sample_precision = 20; // number of samples
+	static const size_t min_target_size = 3;
 
     ev3api::SonarSensor _sonar;
     std::array<bool, map_size> _scanned_map;
