@@ -35,10 +35,10 @@ class TargetList
 
 		using Tone = uint16_t;
 		static const Tone tone_new_target     = 1000;
-		static const Tone tone_new_target_len = 2000;
+		static const Tone tone_new_target_len = 1000;
 
 		static const Tone tone_updated_target     = 2000;
-		static const Tone tone_updated_target_len =  500;
+		static const Tone tone_updated_target_len =  250;
 };
 
 class Tower;
