@@ -25,9 +25,14 @@ private:
     Distance median_distance(std::vector<int16_t>& samples);
 
     bool has_moved(Position position, Distance sample) const;
+	void detect_changes(Position position, Distance distance);
+	void detect_changes(Position position, Distance distance, Direction current_dir);
+	void update_map_from_target();
+	void reorder_target();
+
 
     ScannedTarget scanned_target;
-    bool detected_target = false;
+    bool change_detected = false;
 
     Direction _direction;
 
