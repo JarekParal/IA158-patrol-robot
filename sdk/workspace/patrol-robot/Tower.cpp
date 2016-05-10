@@ -46,10 +46,10 @@ void Tower::received_position_message(PositionMessage msg) {
         return;
 
     // Compute angle
-    double diff = msg.position - _target.x;
+    double diff = (msg.position - _target.x) * walking_step;
     double dist = _target.y;
 
-    double angle = tan(dist / diff) * 180.0 / M_PI;
+    double angle = atan(diff / dist) * 180.0 / M_PI;
     update_position(angle);
 }
 
