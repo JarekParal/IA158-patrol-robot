@@ -44,7 +44,7 @@ class Walker
 		Position      _current_position;
 		Direction     _current_direction;
 
-		const int8_t abs_speed = 15;
+		const int8_t abs_speed = 40;
 };
 
 #endif // WALKER_HPP
