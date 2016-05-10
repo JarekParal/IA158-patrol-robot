@@ -26,7 +26,7 @@ private:
 
     bool has_moved(Position position, Distance sample) const;
 	void detect_changes(Position position, Distance distance);
-	void detect_changes(Position position, Distance distance, Direction current_dir);
+	void update_changes(Position position, Distance distance, Direction current_dir);
 	void update_map_from_target();
 	void reorder_target();
 

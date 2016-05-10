@@ -61,6 +61,9 @@ Distance Scanner::median_distance(std::vector<int16_t>& samples) {
 
 void Scanner::detect_changes(Position position, Distance distance)
 {
+	if ( distance == 255 )
+		return;
+
 	if (has_moved(position, distance)) { // target detected
 		scanned_target._from = position;
 		scanned_target.distances.push_back(distance);
@@ -88,9 +91,15 @@ void Scanner::reorder_target()
 	}
 }
 
-void Scanner::detect_changes(Position position, Distance distance, Direction current_dir)
+void Scanner::update_changes(Position position, Distance distance, Direction current_dir)
 {
-	bool moved = has_moved(position, distance);
+	bool moved;
+
+	if ( distance == 255 )
+		moved = false;
+	else 
+		moved = has_moved(position, distance);
+
 	bool changed_direction = (_direction != current_dir);
 	if (moved && !changed_direction) {
 		// still scanning target
@@ -118,11 +127,8 @@ void Scanner::scan_changes(Position position, Direction current_dir) {
 
 	Distance distance = make_sample(position);
 
-	if ( distance == 255 )
-		return;
-
 	if (change_detected)
-		detect_changes(position, distance, current_dir);
+		update_changes(position, distance, current_dir);
 	else
 		detect_changes(position, distance);
 }
