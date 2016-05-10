@@ -93,12 +93,10 @@ void Scanner::reorder_target()
 
 void Scanner::update_changes(Position position, Distance distance, Direction current_dir)
 {
-	bool moved;
+	if ( distance = 255 )
+		distance = scanned_target.distances.back();
 
-	if ( distance == 255 )
-		moved = false;
-	else 
-		moved = has_moved(position, distance);
+	bool moved = has_moved(position, distance);
 
 	bool changed_direction = (_direction != current_dir);
 	if (moved && !changed_direction) {
