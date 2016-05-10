@@ -108,3 +108,4 @@ bool Scanner::has_moved(Position position, Distance sample) const {
     return (expected - allowed_error > sample ||
             expected + allowed_error < sample);
 }
+

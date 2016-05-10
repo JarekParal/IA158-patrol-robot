@@ -31,7 +31,7 @@ bool match ( ScannedTarget const & _a, ScannedTarget const & _b )
 	if ( a->to() >= b->to() )
 		cover = b->to() - b->from();
 	else
-		cover = b->to() - a->from();
+		cover = a->to() - b->from();
 
 	cover = cover * 2;
 	if ( cover >= total / 2 )
