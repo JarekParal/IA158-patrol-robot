@@ -12,6 +12,9 @@ Tower::Tower(ePortM rotation_port, ePortM fire_port, ID mutex_id)
     _rotation_motor.setBrake(false);
     _rotation_motor.stop();
 
+    _rotation_motor.setCount(0);
+    _fire_motor.setCount(0);
+
     walking_speed = 0;
     walking_position = 0;
 }
