@@ -106,7 +106,7 @@ void TargetList::remove_old_targets()
 			continue;
 
 		// Keep only new targets
-		if ( (now >= i.last_seen ) && ( now - i.last_seen < 60000) )
+		if ( (now >= i.last_seen ) && ( now - i.last_seen < 120*1000) )
 			continue;
 
 		i.valid = false;
