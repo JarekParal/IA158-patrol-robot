@@ -20,7 +20,10 @@ struct Coordinates
 	int16_t y;
 };
 
-enum class Direction { Left, Right };
+enum class Direction {
+	Right, // Default
+	Left
+};
 
 struct PositionMessage {
     Direction direction;

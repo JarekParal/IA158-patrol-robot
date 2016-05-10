@@ -6,14 +6,15 @@
 Scanner::Scanner(ePortS sonar_port) : _sonar(sonar_port) {
 	on_target = nullptr;
 	_scanned_map = {};
+	change_detected = false;
+	_direction = Direction::Right;
 }
 
 void Scanner::task() {}
 
 void Scanner::received_position_message(PositionMessage msg) {
 	Position position = msg.position;
-	int16_t d = _sonar.getDistance();
-	// fprintf(bt, "Position: %d, Distance: %d\n", position, d);
+
 
 	if (_scanned_map[position]) {
 		scan_changes(position, msg.direction);
@@ -23,12 +24,36 @@ void Scanner::received_position_message(PositionMessage msg) {
 			_depth_map[position] = distance;
 			_scanned_map[position] = true;
 		}
+	}
+	if ( _direction != msg.direction )
+	{
+		print_depth_map();
 		_direction = msg.direction;
 	}
 }
 
+void Scanner::print_depth_map()
+{
+	fprintf ( bt, "\n----------\n");
+
+	for (size_t i = 0; i < map_size; i++)
+	{
+		if ( !_scanned_map[i] )
+			fprintf ( bt, "--- " );
+		else
+			fprintf ( bt, "%3d ", _depth_map[i] );
+
+	}
+	fprintf ( bt, "\n----------\n");
+}
+
 Distance Scanner::make_sample(Position position) {
 	std::vector<int16_t> samples;
+
+	int16_t d = _sonar.getDistance();
+	fprintf(bt, "%d\n", d);
+	//fprintf(bt, "Position: %d, Distance: %d\n", position, d);
+	return d;
 
 	for (unsigned i = 0; i < sample_precision; ++i) {
 		samples.push_back(_sonar.getDistance());

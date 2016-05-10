@@ -21,6 +21,7 @@ public:
 private:
     Distance make_sample(Position position);
     void scan_changes(Position position, Direction current_dir);
+	void print_depth_map();
 
     Distance median_distance(std::vector<int16_t>& samples);
 
@@ -32,7 +33,7 @@ private:
 
 
     ScannedTarget scanned_target;
-    bool change_detected = false;
+    bool change_detected;
 
     Direction _direction;
 
