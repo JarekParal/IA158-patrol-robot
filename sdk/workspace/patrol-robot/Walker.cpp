@@ -85,6 +85,11 @@ void Walker::change_direction()
 		case Direction::Left:
 			_current_direction = Direction::Right;
 			_motor.set_speed ( +abs_speed, wheel_response_time );
+			if ( _current_position != 0 )
+			{
+				fprintf ( bt, "Warning: position is %d instead of 0. Forcing 0.\n", _current_position );
+				_current_position = 0;
+			}
 			break;
 	}
 }

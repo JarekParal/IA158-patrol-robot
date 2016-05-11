@@ -13,22 +13,30 @@ Scanner::Scanner(ePortS sonar_port) : _sonar(sonar_port) {
 void Scanner::task() {}
 
 void Scanner::received_position_message(PositionMessage msg) {
-	Position position = msg.position;
 
+	update_map(msg.position, msg.direction);
+
+	if ( _direction != msg.direction )
+	{
+		print_depth_map();
+		_direction = msg.direction;
+	}
+}
+
+void Scanner::update_map(Position position, Direction direction)
+{
+	// Out of bounds?
+	if ( (position < 0) || (position >= map_size) )
+		return;
 
 	if (_scanned_map[position]) {
-		scan_changes(position, msg.direction);
+		scan_changes(position, direction);
 	} else {
 		Distance distance = make_sample(position);
 		if (distance != 255) {
 			_depth_map[position] = distance;
 			_scanned_map[position] = true;
 		}
-	}
-	if ( _direction != msg.direction )
-	{
-		print_depth_map();
-		_direction = msg.direction;
 	}
 }
 

@@ -29,6 +29,7 @@ private:
 	void detect_changes(Position position, Distance distance);
 	void update_changes(Position position, Distance distance, Direction current_dir);
 	void update_map_from_target();
+	void update_map(Position position, Direction direction);
 	void reorder_target();
 
 

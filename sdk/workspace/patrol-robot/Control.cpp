@@ -45,8 +45,8 @@ TargetId TargetList::next_id()
 
 void TargetList::insert ( TargetItem & item, ScannedTarget target, SYSTIM now )
 {
-	fprintf ( bt, "updating %u:\n", item.id );
-	print ( bt, 1, target );
+	//fprintf ( bt, "updating %u:\n", item.id );
+	//print ( bt, 1, target );
 	strip ( target );
 	if ( target.distances.size() == 0 )
 	{
@@ -276,14 +276,20 @@ void Control::loop()
 		else if (is_prefix_of("list", buff)) {
 			print(bt, _target_list);
 		}
-		else if (is_prefix_of("lock", buff)) {
+		else if (is_prefix_of("lockat", buff)) {
+			int x,y;
+			if ( 2 == sscanf(buff, "lockat %d %d", &x, &y ) )
+				_tower.lock_at ( Coordinates { x, y } );
+			else
+				fprintf (bt, "usage: lockat 8 15\n");
+				
+		} else if (is_prefix_of("lock", buff)) {
 			unsigned int target_id;
 			if (1 == sscanf(buff, "lock %u", &target_id))
 				lock_target(TargetId(target_id));
 			else
 				fprintf(bt, "usage: lock 12\n");
-		}
-		else if (is_prefix_of("unlock", buff)) {
+		} else if (is_prefix_of("unlock", buff)) {
 			_tower.unlock();
 		} 
 		else if (is_prefix_of("shoot", buff)) {
