@@ -72,6 +72,7 @@ bool Scanner<DistanceSensor>::continuous_change(Distance prev, Distance curr)
 template <class DistanceSensor>
 void Scanner<DistanceSensor>::continue_detecting_object(Position position, Distance distance)
 {
+	// _is_boundary_position
 	if ( distance_is_error(distance) )
 	{
 		// we assume previous value
@@ -82,20 +83,12 @@ void Scanner<DistanceSensor>::continue_detecting_object(Position position, Dista
 	bool background = distance_is_background(distance);
 	bool continuous = continuous_change(previous_distance(), distance);
 
-	if ( !continuous )
-		fprintf ( bt, "not continuous: prev=%d, curr=%d\n", previous_distance(), distance );
-
-	if ( !background && continuous )
+	if ( !background && continuous && !_is_boundary_position )
 	{
 		_current_object_distances.push_back(distance);
-	}
-
-	if ( background || !continuous )
-	{
+	} else {
 		// Object ended
 		fprintf ( bt, "Object ended at position %d, distance %d\n", position, distance );
-		// TODO
-		assert ( !_current_object_distances.empty() );
 
 		auto min_distance_it = std::min_element(
 				_current_object_distances.begin(),
@@ -114,6 +107,7 @@ void Scanner<DistanceSensor>::continue_detecting_object(Position position, Dista
 			fprintf ( bt, "%d ", d );
 		}
 		fprintf ( bt, "\n");
+		on_target(DepthObject{Coordinates{position_of_minimal_distance, min_distance}});
 		_current_object_distances.clear();
 	}
 }
