@@ -20,6 +20,12 @@ bool Scanner<DistanceSensor>::distance_is_background ( Distance dist ) const
 {
 	return dist >= _background_distance;
 }
+template <class DistanceSensor>
+void Scanner<DistanceSensor>::set_background ( Distance d )
+{
+	_background_distance = d;
+}
+
 
 template <class DistanceSensor>
 void Scanner<DistanceSensor>::received_position_message(PositionMessage msg)

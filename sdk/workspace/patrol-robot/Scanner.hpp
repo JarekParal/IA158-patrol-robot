@@ -18,6 +18,7 @@ public:
 
     void received_position_message(PositionMessage msg);
     Event<DepthObject> on_target;
+	void set_background ( Distance d );
 
 private:
     Distance make_sample();
@@ -42,10 +43,10 @@ private:
 
     Direction _direction;
 
-    static const size_t map_size = 256;
-    static const size_t allowed_error = 10;      // in cm
     static const unsigned sample_precision = 20; // number of samples
 	static const size_t min_target_size = 3;
+	static const bool   ignore_flat_objects = true;
+	static const size_t max_flat_object_depth = 2;
 
     DistanceSensor _sonar;
 
