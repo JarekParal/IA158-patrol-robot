@@ -29,6 +29,11 @@
 FILE* bt;
 
 
+extern "C"
+{
+	void * __dso_handle = nullptr;
+}
+
 using DistanceSensor = ev3api::SonarSensor;
 //using DistanceSensor = ev3api::IrSensor;
 
