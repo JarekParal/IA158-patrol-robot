@@ -26,6 +26,7 @@ public:
 
     void received_position_message(PositionMessage msg);
     Event<DepthObject> on_target;
+	std::function<void()>        on_next_round;
 
 	// < IScanner >
 	virtual void set_background ( Distance d ) override;

@@ -41,7 +41,6 @@ class PatrolRobot {
 public:
     PatrolRobot();
 
-    void every_1s();
     void every_1ms();
 
 public:
@@ -70,10 +69,10 @@ PatrolRobot::PatrolRobot()
     scanner.on_target = [this](DepthObject o) {
         control.here_is_a_target(o);
     };
-}
-
-void PatrolRobot::every_1s() {
-    control.every_1s();
+	
+	scanner.on_next_round = [this]() {
+		control.next_round();
+	};
 }
 
 void PatrolRobot::every_1ms() {
@@ -92,7 +91,6 @@ void main_task(intptr_t unused) {
 
     act_tsk(SCANNER_TASK);
 
-    ev3_sta_cyc(EVERY_1S);
     ev3_sta_cyc(EVERY_1MS);
 
     act_tsk(WALKER_TASK);
@@ -141,6 +139,3 @@ void every_1ms() {
     robot->every_1ms();
 }
 
-void every_1s() {
-    robot->every_1s();
-}

@@ -78,7 +78,7 @@ void Tower::update_position(double angle) {
     double diff = current_pos - desired_angle;
 
     _rotation_motor.stop();
-    _rotation_motor.rotate(diff, speed, false);
+    _rotation_motor.rotate(-diff, 100, false);
 }
 
 void Tower::calibrate(int16_t angle) {

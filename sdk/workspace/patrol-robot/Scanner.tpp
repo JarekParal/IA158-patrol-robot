@@ -5,6 +5,7 @@
 template <class DistanceSensor>
 Scanner<DistanceSensor>::Scanner(ePortS sonar_port) : _sonar(sonar_port) {
 	on_target = nullptr;
+	on_next_round = nullptr;
     change_detected = false;
     _direction = Direction::Right;
 	_is_boundary_position = true;
@@ -53,6 +54,9 @@ void Scanner<DistanceSensor>::received_position_message(PositionMessage msg)
 		}
 	}
 
+	if ( _is_boundary_position && on_next_round )
+		on_next_round();
+
 	_direction = msg.direction;
 	_previous_distance = current_distance;
 }
@@ -94,7 +98,7 @@ void Scanner<DistanceSensor>::continue_detecting_object(Position position, Dista
 		_current_object_distances.push_back(distance);
 	} else {
 		// Object ended
-		fprintf ( bt, "Object ended at position %d, distance %d\n", position, distance );
+		//fprintf ( bt, "Object ended at position %d, distance %d\n", position, distance );
 
 		auto min_distance_it = std::min_element(
 				_current_object_distances.begin(),
@@ -106,13 +110,13 @@ void Scanner<DistanceSensor>::continue_detecting_object(Position position, Dista
 			position_of_minimal_distance = position - _current_object_distances.size() + min_position_diff;
 		else
 			position_of_minimal_distance = position + _current_object_distances.size() - min_position_diff;
-		fprintf ( bt, "Object center at position %d, distance %d\n", position_of_minimal_distance, min_distance );
-		fprintf ( bt, "Object distances: " );
-		for ( Distance d : _current_object_distances )
-		{
-			fprintf ( bt, "%d ", d );
-		}
-		fprintf ( bt, "\n");
+		//fprintf ( bt, "Object center at position %d, distance %d\n", position_of_minimal_distance, min_distance );
+		//fprintf ( bt, "Object distances: " );
+		//for ( Distance d : _current_object_distances )
+		//{
+		//	fprintf ( bt, "%d ", d );
+		//}
+		//fprintf ( bt, "\n");
 		on_target(DepthObject{Coordinates{position_of_minimal_distance, min_distance}});
 		_current_object_distances.clear();
 	}
@@ -129,7 +133,7 @@ void Scanner<DistanceSensor>::start_detecting_object(Position position, Distance
 	if ( distance_is_error(distance) || background || !continuous )
 		return;
 
-	fprintf ( bt, "Object started at %d, distance %d\n", position, distance );
+	//fprintf ( bt, "Object started at %d, distance %d\n", position, distance );
 
 	_current_object_distances.clear();
 	_current_object_distances.push_back(distance);

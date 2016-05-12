@@ -5,11 +5,12 @@
 #include "Target.hpp"
 
 using TargetId = uint8_t;
+using TTL = uint8_t;
 struct TargetItem
 {
 	TargetId      id;
 	DepthObject   target;
-	SYSTIM        last_seen;
+	TTL           ttl;
 };
 
 class TargetList
@@ -19,7 +20,7 @@ class TargetList
 		using Targets = std::vector<TargetItem>;
 
 		TargetId insert(DepthObject o);
-		void remove_old_targets(unsigned age);
+		void remove_old_targets();
 		Targets const &targets() const;
 
 	private:
@@ -48,7 +49,7 @@ class Control
 		explicit Control ( ID mutex_id, Tower & tower, IScanner & scanner );
 		void loop();
 		void here_is_a_target (DepthObject o);
-		void every_1s();
+		void next_round();
 
 		void lock_target ( TargetId id );
 

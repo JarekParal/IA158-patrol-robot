@@ -33,7 +33,7 @@ TargetId TargetList::next_id()
 double TargetList::distance(DepthObject a, DepthObject b) {
 	double xx = a.coordinates.x - b.coordinates.x;
 	double yy = a.coordinates.y - b.coordinates.y;
-	return sqrt(4*(xx * xx) + yy * yy);
+	return sqrt(4*(xx * xx) + (yy * yy)/16.0);
 }
 
 TargetId TargetList::insert(DepthObject target)
@@ -44,29 +44,30 @@ TargetId TargetList::insert(DepthObject target)
 		if (dist < distance_threshold) {
 			// Update
 			existing_target.target = target;
+			existing_target.ttl = TTL(1);
 			ev3_speaker_play_tone(tone_updated_target, tone_updated_target_len);
 			return existing_target.id;
 		}
 	}
 
-	SYSTIM now;
-	get_tim (&now);
-	_targets.push_back({next_id(), target, now});
+	_targets.push_back({next_id(), target, TTL(1)});
 	ev3_speaker_play_tone(tone_new_target, tone_new_target_len);
 	return _targets.back().id;
 }
 
-void TargetList::remove_old_targets(unsigned age)
+void TargetList::remove_old_targets()
 {
-	SYSTIM now;
-	get_tim (&now);
-
 	auto begin = std::remove_if(_targets.begin(), _targets.end(),
 			[&](const TargetItem& i) {
-			return now >= i.last_seen && now - i.last_seen > age * 1000;
+			return i.ttl == 0;
 			});
-
 	_targets.erase(begin, _targets.end());
+
+	std::transform(_targets.begin(), _targets.end(), _targets.begin(),
+			[](TargetItem i){
+			i.ttl--;
+			return i;
+			});
 }
 
 Control::Control ( ID mutex_id, Tower & tower, IScanner & scanner) :
@@ -84,17 +85,16 @@ void Control::here_is_a_target(DepthObject o)
 		lock_target(_locked_id);
 }
 
-void Control::every_1s()
+void Control::next_round()
 {
 	loc_mtx ( _mutex_id );
-	_target_list.remove_old_targets(max_age);
+	_target_list.remove_old_targets();
 	unl_mtx ( _mutex_id );
 }
 
 static void print ( FILE * fw, TargetItem const & item, SYSTIM now )
 {
-	fprintf ( fw, "{ ID: %d, last_seen: %.3f, target:",
-			item.id, double (now - item.last_seen) / 1000 );
+	fprintf ( fw, "{ ID: %d, target:", item.id);
 	print ( fw, 1, item.target );
 	fprintf ( fw, "}\n" );
 }
@@ -171,8 +171,8 @@ void Control::lock_target ( TargetId id )
 		if ( it.id == id )
 		{
 			unl_mtx ( _mutex_id );
-			fprintf ( bt, "locking at [%d, %d]\n", it.target.coordinates.x,
-					it.target.coordinates.y );
+			//fprintf ( bt, "locking at [%d, %d]\n", it.target.coordinates.x,
+			//		it.target.coordinates.y );
 			_tower.lock_at ( it.target.coordinates );
 			return;
 		}
