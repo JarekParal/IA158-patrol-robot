@@ -96,8 +96,8 @@ static void print ( FILE *fw, TargetList const & tl )
 	SYSTIM now;
 	get_tim ( &now );
 
-	fprintf ( fw, "{\n" );
 	auto const & targets = tl.targets();
+	fprintf ( fw, "%u :{\n", targets.size() );
 	for ( TargetItem const & item : targets )
 	{
 		fprintf ( fw, "\t" );
