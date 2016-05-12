@@ -57,7 +57,7 @@ void TargetList::remove_old_targets(unsigned age)
 
 	auto begin = std::remove_if(_targets.begin(), _targets.end(),
 		[&](const TargetItem& i) {
-			return now >= i.last_seen && now - i.last_seen < age * 1000;
+			return now >= i.last_seen && now - i.last_seen > age * 1000;
 		});
 
 	_targets.erase(begin, _targets.end());
