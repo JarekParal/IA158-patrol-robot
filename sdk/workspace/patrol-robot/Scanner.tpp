@@ -10,7 +10,7 @@ Scanner<DistanceSensor>::Scanner(ePortS sonar_port) : _sonar(sonar_port) {
     _direction = Direction::Right;
 	_is_boundary_position = true;
 	_background_detected = false;
-	_background_distance = 10;
+	_background_distance = 0;
 }
 
 template <class DistanceSensor>
@@ -33,16 +33,24 @@ void Scanner<DistanceSensor>::received_position_message(PositionMessage msg) {
 
 	if ( _background_detected )
 	{
+		detect_object(msg.position, current_distance);
 		if ( _is_boundary_position )
 		{
 			print_depth_map();
-		} else {
-			detect_object(msg.position, current_distance);
 		}
 	} else {
-		_background_distance = std::max(_background_distance, current_distance);
-		if ( _is_boundary_position && (msg.direction == Direction::Left) )
+		if ( !distance_is_error(current_distance) )
+		{
+			_background_distance = std::max(_background_distance, current_distance);
+		}
+		if ( _is_boundary_position && (msg.direction == Direction::Left) ) {
+			if ( _background_distance >= 1 )
+				_background_distance = std::max ( 15, _background_distance - 15 );
+			else
+				_background_distance = 254; // only errors were detected
+			fprintf ( bt, "background: %d\n", _background_distance );
 			_background_detected = true;
+		}
 	}
 
 	_direction = msg.direction;
@@ -80,6 +88,8 @@ void Scanner<DistanceSensor>::continue_detecting_object(Position position, Dista
 	bool background = distance_is_background(distance);
 	bool continuous = continuous_change(previous_distance(), distance);
 
+	if ( !continuous )
+		fprintf ( bt, "not continuous: prev=%d, curr=%d\n", previous_distance(), distance );
 
 	if ( !background && continuous )
 	{
@@ -89,46 +99,58 @@ void Scanner<DistanceSensor>::continue_detecting_object(Position position, Dista
 	if ( background || !continuous )
 	{
 		// Object ended
-		fprintf ( bt, "Object ended at %d\n", position );
+		fprintf ( bt, "Object ended at position %d, distance %d\n", position, distance );
 		// TODO
+		assert ( !_current_object_distances.empty() );
+
 		auto min_distance_it = std::min_element(
 				_current_object_distances.begin(),
 				_current_object_distances.end()   );
+		Distance min_distance = *min_distance_it;
 		size_t min_position_diff = min_distance_it - _current_object_distances.begin();
 		Position position_of_minimal_distance;
 		if ( _direction == Direction:: Right)
-			position_of_minimal_distance = position + min_position_diff;
+			position_of_minimal_distance = position - _current_object_distances.size() + min_position_diff;
 		else
-			position_of_minimal_distance = position - min_position_diff;
-		fprintf ( bt, "Object center at %d\n", position_of_minimal_distance );
-		_detecting_object = false;
+			position_of_minimal_distance = position + _current_object_distances.size() - min_position_diff;
+		fprintf ( bt, "Object center at position %d, distance %d\n", position_of_minimal_distance, min_distance );
+		fprintf ( bt, "Object distances: " );
+		for ( Distance d : _current_object_distances )
+		{
+			fprintf ( bt, "%d ", d );
+		}
+		fprintf ( bt, "\n");
 		_current_object_distances.clear();
 	}
-
-	if ( !background && !continuous )
-	{
-		// new object started
-		start_detecting_object(position, distance);
-	}
-
 }
 
 template <class DistanceSensor>
 void Scanner<DistanceSensor>::start_detecting_object(Position position, Distance distance)
 {
-	if ( distance_is_error(distance) || distance_is_background(distance) )
+	assert (!detecting_object());
+
+	bool background = distance_is_background(distance);
+	bool continuous = continuous_change(previous_distance(), distance);
+
+	if ( distance_is_error(distance) || background || !continuous )
 		return;
 
-	_detecting_object = true;
+	fprintf ( bt, "Object started at %d, distance %d\n", position, distance );
+
 	_current_object_distances.clear();
 	_current_object_distances.push_back(distance);
 	_current_object_start = position;	
+}
+template <class DistanceSensor>
+bool Scanner<DistanceSensor>::detecting_object() const
+{
+	return !_current_object_distances.empty();
 }
 
 template <class DistanceSensor>
 void Scanner<DistanceSensor>::detect_object(Position position, Distance distance)
 {
-	if (_detecting_object )
+	if (detecting_object() )
 		continue_detecting_object(position, distance);
 	else
 		start_detecting_object(position, distance);

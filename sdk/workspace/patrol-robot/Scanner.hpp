@@ -35,6 +35,7 @@ private:
 	void detect_object(Position position, Distance distance);
 	void start_detecting_object(Position position, Distance distance);
 	void continue_detecting_object(Position position, Distance distance);
+	bool detecting_object() const;
 
 	void reorder_target();
 	
@@ -64,7 +65,6 @@ private:
 	bool _previous_was_boundary_position;
 	bool _is_boundary_position;
 	Distance _previous_distance;
-	bool _detecting_object;
 	std::vector<Distance> _current_object_distances;
 	Position _current_object_start;
 };
