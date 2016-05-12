@@ -17,7 +17,7 @@ public:
     void task();
 
     void received_position_message(PositionMessage msg);
-    Event<ScannedTarget> on_target;
+    Event<DepthObject> on_target;
 
 private:
     Distance make_sample();

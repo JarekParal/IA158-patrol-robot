@@ -62,8 +62,8 @@ PatrolRobot::PatrolRobot()
         scanner.received_position_message(m);
     };
 
-    scanner.on_target = [this](ScannedTarget t) {
-        control.here_is_a_target(std::move(t));
+    scanner.on_target = [this](DepthObject o) {
+        control.here_is_a_target(o);
     };
 }
 
