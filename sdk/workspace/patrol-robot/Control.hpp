@@ -15,9 +15,10 @@ struct TargetItem
 class TargetList
 {
 	public:
+		TargetList() : _max_id(0) {}
 		using Targets = std::vector<TargetItem>;
 
-		void insert(DepthObject o);
+		TargetId insert(DepthObject o);
 		void remove_old_targets(unsigned age);
 		Targets const &targets() const;
 
@@ -35,7 +36,7 @@ class TargetList
 		static const Tone tone_updated_target     = 2000;
 		static const Tone tone_updated_target_len =  250;
 
-		static constexpr const double distance_threshold = 10;
+		static constexpr const double distance_threshold = 30;
 };
 
 class Tower;
@@ -54,6 +55,7 @@ class Control
 		TargetList _target_list;
 		ID         _mutex_id;
 		Tower    & _tower;
+		TargetId   _locked_id;
 
 		static const unsigned max_age = 120;
 

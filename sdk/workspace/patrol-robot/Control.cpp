@@ -33,14 +33,14 @@ double TargetList::distance(DepthObject a, DepthObject b) {
 	return sqrt(xx * xx + yy * yy);
 }
 
-void TargetList::insert(DepthObject target)
+TargetId TargetList::insert(DepthObject target)
 {
 	for (auto& existing_target : _targets) {
 		if (distance(target, existing_target.target) < distance_threshold) {
 			// Update
 			existing_target.target = target;
 			ev3_speaker_play_tone(tone_updated_target, tone_updated_target_len);
-			return;
+			return existing_target.id;
 		}
 	}
 
@@ -48,6 +48,7 @@ void TargetList::insert(DepthObject target)
 	get_tim (&now);
 	_targets.push_back({next_id(), target, now});
 	ev3_speaker_play_tone(tone_new_target, tone_new_target_len);
+	return _targets.back().id;
 }
 
 void TargetList::remove_old_targets(unsigned age)
@@ -64,7 +65,7 @@ void TargetList::remove_old_targets(unsigned age)
 }
 
 Control::Control ( ID mutex_id, Tower & tower ) :
-	_tower ( tower )
+	_tower ( tower ), _locked_id(0xFF)
 {
 	_mutex_id = mutex_id;
 }
@@ -74,6 +75,8 @@ void Control::here_is_a_target(DepthObject o)
 	loc_mtx ( _mutex_id );
 	_target_list.insert(std::move(o));
 	unl_mtx ( _mutex_id );
+	if (_locked_id != 0xFF)
+		lock_target(_locked_id);
 }
 
 void Control::every_1s()
@@ -220,11 +223,14 @@ void Control::loop()
 				
 		} else if (is_prefix_of("lock", buff)) {
 			unsigned int target_id;
-			if (1 == sscanf(buff, "lock %u", &target_id))
+			if (1 == sscanf(buff, "lock %u", &target_id)) {
 				lock_target(TargetId(target_id));
+				_locked_id = target_id;
+			}
 			else
 				fprintf(bt, "usage: lock 12\n");
 		} else if (is_prefix_of("unlock", buff)) {
+			_locked_id = 0xFF;
 			_tower.unlock();
 		} 
 		else if (is_prefix_of("shoot", buff)) {
