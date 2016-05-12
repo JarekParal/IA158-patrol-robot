@@ -33,13 +33,15 @@ TargetId TargetList::next_id()
 double TargetList::distance(DepthObject a, DepthObject b) {
 	double xx = a.coordinates.x - b.coordinates.x;
 	double yy = a.coordinates.y - b.coordinates.y;
-	return sqrt(xx * xx + yy * yy);
+	return sqrt(4*(xx * xx) + yy * yy);
 }
 
 TargetId TargetList::insert(DepthObject target)
 {
 	for (auto& existing_target : _targets) {
-		if (distance(target, existing_target.target) < distance_threshold) {
+		auto dist = distance (target, existing_target.target );
+		//fprintf ( bt, "updating: ||new - existing|| == %f\n", dist );
+		if (dist < distance_threshold) {
 			// Update
 			existing_target.target = target;
 			ev3_speaker_play_tone(tone_updated_target, tone_updated_target_len);
