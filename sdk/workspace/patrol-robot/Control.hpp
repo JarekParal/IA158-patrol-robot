@@ -8,27 +8,22 @@ using TargetId = uint8_t;
 struct TargetItem
 {
 	TargetId      id;
-	ScannedTarget target;
-	bool          valid;
+	DepthObject   target;
 	SYSTIM        last_seen;
 };
 
 class TargetList
 {
 	public:
-		TargetList();
-		using Targets = std::array<TargetItem, 5>;
+		using Targets = std::vector<TargetItem>;
 
-		void update ( ScannedTarget t );
-		void remove_old_targets();
-		void remove ( TargetId id );
-
-		Targets const & targets() const;
+		void insert(DepthObject o);
+		void remove_old_targets(unsigned age);
+		Targets const &targets() const;
 
 	private:
 		TargetId next_id();
-		void insert ( TargetItem & item, ScannedTarget target, SYSTIM now );
-
+		static double distance(DepthObject a, DepthObject b);
 
 		Targets _targets;
 		TargetId _max_id;
@@ -39,6 +34,8 @@ class TargetList
 
 		static const Tone tone_updated_target     = 2000;
 		static const Tone tone_updated_target_len =  250;
+
+		static constexpr const double distance_threshold = 10;
 };
 
 class Tower;
@@ -48,7 +45,7 @@ class Control
 	public:
 		explicit Control ( ID mutex_id, Tower & tower );
 		void loop();
-		void here_is_a_target ( ScannedTarget t );
+		void here_is_a_target (DepthObject o);
 		void every_1s();
 
 		void lock_target ( TargetId id );
@@ -57,6 +54,9 @@ class Control
 		TargetList _target_list;
 		ID         _mutex_id;
 		Tower    & _tower;
+
+		static const unsigned max_age = 120;
+
 };
 
 

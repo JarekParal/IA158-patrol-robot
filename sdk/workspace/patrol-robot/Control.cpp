@@ -1,5 +1,7 @@
 #include "Tower.hpp"
 #include "Control.hpp"
+#include <cmath>
+#include <algorithm>
 
 static void print_tabs ( FILE * fw, size_t tabs )
 {
@@ -7,28 +9,10 @@ static void print_tabs ( FILE * fw, size_t tabs )
 		fputc ( '\t', fw );
 }
 
-static void print ( FILE * fw, size_t tabs, ScannedTarget const & target )
+static void print ( FILE * fw, size_t tabs, DepthObject const & target )
 {
 	print_tabs ( fw, tabs );
-	fprintf ( fw, "{ from: %d, distances: [ ", target.from() );
-	for ( size_t i = 0; i < target.distances.size(); i++ )
-	{
-		if ( i != 0 )
-			fprintf ( fw, ", " );
-		fprintf ( fw, " %d", target.distances[i] );
-
-	}
-	fprintf ( fw, "] }\n" );
-}
-
-
-TargetList::TargetList()
-{
-	_max_id = 0;
-	for ( TargetItem & i : _targets )
-	{
-		i.valid = false;
-	}
+	fprintf ( fw, "{ %d, %d }", target.coordinates.x, target.coordinates.y);
 }
 
 TargetList::Targets const & TargetList::targets() const
@@ -43,85 +27,40 @@ TargetId TargetList::next_id()
 	return id;
 }
 
-void TargetList::insert ( TargetItem & item, ScannedTarget target, SYSTIM now )
-{
-	//fprintf ( bt, "updating %u:\n", item.id );
-	//print ( bt, 1, target );
-	strip ( target );
-	if ( target.distances.size() == 0 )
-	{
-		item.valid = false;
-		return;
-	}
-
-	item.valid = true;
-	item.target = std::move ( target );
-	item.last_seen = now;
+double TargetList::distance(DepthObject a, DepthObject b) {
+	double xx = a.coordinates.x - b.coordinates.x;
+	double yy = a.coordinates.y - b.coordinates.y;
+	return sqrt(xx * xx + yy * yy);
 }
 
-void TargetList::update ( ScannedTarget target )
+void TargetList::insert(DepthObject target)
+{
+	for (auto& existing_target : _targets) {
+		if (distance(target, existing_target.target) < distance_threshold) {
+			// Update
+			existing_target.target = target;
+			ev3_speaker_play_tone(tone_updated_target, tone_updated_target_len);
+			return;
+		}
+	}
+
+	SYSTIM now;
+	get_tim (&now);
+	_targets.push_back({next_id(), target, now});
+	ev3_speaker_play_tone(tone_new_target, tone_new_target_len);
+}
+
+void TargetList::remove_old_targets(unsigned age)
 {
 	SYSTIM now;
-	get_tim ( &now );
+	get_tim (&now);
 
-	// Update already existing target
-	for ( TargetItem & i : _targets )
-	{
-		if ( !i.valid )
-			continue;
+	auto begin = std::remove_if(_targets.begin(), _targets.end(),
+		[&](const TargetItem& i) {
+			return now >= i.last_seen && now - i.last_seen < age * 1000;
+		});
 
-		if ( !match ( i.target, target ) )
-			continue;
-
-		insert ( i, std::move ( target ), now );
-		//ev3_speaker_play_tone(tone_updated_target, tone_updated_target_len);
-		return;
-	}
-
-	// there is no such target in list
-	// try to add a new one
-	for ( TargetItem & i : _targets )
-	{
-		if ( i.valid )
-			continue;
-
-		i.id = next_id();
-		insert ( i, std::move ( target ), now );
-		//ev3_speaker_play_tone(tone_new_target, tone_new_target_len);
-		return;
-	}
-
-
-	// Oops, target list is full.
-	// We rather lost a new target
-	// then some old one.
-}
-
-void TargetList::remove_old_targets()
-{
-	SYSTIM now;
-	get_tim ( &now );
-
-	for ( TargetItem & i : _targets )
-	{
-		if ( !i.valid )
-			continue;
-
-		// Keep only new targets
-		if ( (now >= i.last_seen ) && ( now - i.last_seen < 120*1000) )
-			continue;
-
-		i.valid = false;
-	}
-}
-
-void TargetList::remove ( TargetId id )
-{
-	for ( TargetItem & i : _targets )
-	{
-		if ( i.id == id )
-			i.valid = false;
-	}
+	_targets.erase(begin, _targets.end());
 }
 
 Control::Control ( ID mutex_id, Tower & tower ) :
@@ -130,17 +69,17 @@ Control::Control ( ID mutex_id, Tower & tower ) :
 	_mutex_id = mutex_id;
 }
 
-void Control::here_is_a_target ( ScannedTarget t )
+void Control::here_is_a_target(DepthObject o)
 {
 	loc_mtx ( _mutex_id );
-	_target_list.update ( std::move(t) );
+	_target_list.insert(std::move(o));
 	unl_mtx ( _mutex_id );
 }
 
 void Control::every_1s()
 {
 	loc_mtx ( _mutex_id );
-	_target_list.remove_old_targets();
+	_target_list.remove_old_targets(max_age);
 	unl_mtx ( _mutex_id );
 }
 
@@ -161,8 +100,6 @@ static void print ( FILE *fw, TargetList const & tl )
 	auto const & targets = tl.targets();
 	for ( TargetItem const & item : targets )
 	{
-		if ( !item.valid )
-			continue;
 		fprintf ( fw, "\t" );
 		print   ( fw, item, now );
 		fprintf ( fw, "\n" );
@@ -223,14 +160,12 @@ void Control::lock_target ( TargetId id )
 
 	for ( TargetItem const & it : _target_list.targets() )
 	{
-		if ( it.valid && (it.id == id) )
+		if ( it.id == id )
 		{
-			size_t mid = it.target.distances.size() / 2;
-			int16_t y = it.target.distances[mid];
-			int16_t x = it.target.from() + mid;
 			unl_mtx ( _mutex_id );
-			fprintf ( bt, "locking at [%d, %d]\n", x, y );
-			_tower.lock_at ( Coordinates { x, y } );
+			fprintf ( bt, "locking at [%d, %d]\n", it.target.coordinates.x,
+				it.target.coordinates.y );
+			_tower.lock_at ( it.target.coordinates );
 			return;
 		}
 	}
