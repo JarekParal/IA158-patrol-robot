@@ -106,6 +106,7 @@ ER ev3_sensor_config(sensor_port_t port, sensor_type_t type) {
     case ULTRASONIC_SENSOR:
     case GYRO_SENSOR:
     case COLOR_SENSOR:
+    case IR_SENSOR:
         // Configure UART sensor
     	ercd = uart_sensor_config(port, 0);
     	assert(ercd == E_OK);
@@ -288,6 +289,27 @@ int16_t ev3_ultrasonic_sensor_get_distance(sensor_port_t port) {
 	int16_t val;
 	uart_sensor_fetch_data(port, US_DIST_CM, &val, sizeof(val));
     return val / 10;
+
+error_exit:
+    syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
+    return 0;
+}
+
+int16_t ev3_ir_sensor_get_distance(sensor_port_t port) {
+    ER ercd;
+
+//  lazy_initialize();
+    CHECK_PORT(port);
+    CHECK_COND(ev3_sensor_get_type(port) == IR_SENSOR, E_OBJ);
+
+#if 0
+    return ev3_uart_sensor_get_short(port) / 10;
+#endif
+    int16_t val;
+    uart_sensor_fetch_data(port, 0, &val, sizeof(val));
+    if (val > 100)
+        val = -1;
+    return val * 70 / 100;
 
 error_exit:
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);

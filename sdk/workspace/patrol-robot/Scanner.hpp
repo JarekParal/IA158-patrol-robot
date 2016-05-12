@@ -10,6 +10,7 @@
 #include "Common.hpp"
 #include "Target.hpp"
 
+template <class DistanceSensor>
 class Scanner {
 public:
     explicit Scanner(ePortS sonar_port);
@@ -43,9 +44,11 @@ private:
     static const unsigned sample_precision = 20; // number of samples
 	static const size_t min_target_size = 3;
 
-    ev3api::SonarSensor _sonar;
+    DistanceSensor _sonar;
     std::array<bool, map_size> _scanned_map;
     std::array<Distance, map_size> _depth_map;
 };
+
+#include "Scanner.tpp"
 
 #endif // SCANNER_HPP

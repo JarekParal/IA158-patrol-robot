@@ -16,6 +16,7 @@
 #include <Motor.h>
 #include <Clock.h>
 #include <TouchSensor.h>
+#include <IrSensor.h>
 
 // Project
 #include "Common.hpp"
@@ -37,7 +38,7 @@ public:
 public:
     SmoothMotor walking_motor;
     Walker walker;
-    Scanner scanner;
+    Scanner<ev3api::SonarSensor> scanner;
     Tower tower;
     Control control;
 };

@@ -49,7 +49,8 @@ typedef enum {
     COLOR_SENSOR,	     //!< \~English Color sensor					  \~Japanese カラーセンサ
 	HT_NXT_ACCEL_SENSOR, //!< \~English HiTechnic NXT acceleration sensor \~Japanese 加速度センサ（HiTechnic社製）
 	NXT_TEMP_SENSOR,     //!< \~English NXT temperature sensor            \~Japanese NXT温度センサ
-    TNUM_SENSOR_TYPE     //!< \~English Number of sensor types 			  \~Japanese センサタイプの数
+    TNUM_SENSOR_TYPE,    //!< \~English Number of sensor types 			  \~Japanese センサタイプの数
+    IR_SENSOR
 } sensor_type_t;
 
 /**
@@ -225,6 +226,8 @@ ER ev3_gyro_sensor_reset(sensor_port_t port);
  * \return      距離（単位はセンチ）
  */
 int16_t ev3_ultrasonic_sensor_get_distance(sensor_port_t port);
+
+int16_t ev3_ir_sensor_get_distance(sensor_port_t port);
 
 /**
  * \~English
