@@ -30,7 +30,7 @@
  *      また，本ソフトウェアのユーザまたはエンドユーザからのいかなる理
  *      由に基づく請求からも，上記著作権者およびTOPPERSプロジェクトを
  *      免責すること．
- * 
+ *
  *  本ソフトウェアは，無保証で提供されているものである．上記著作権者お
  *  よびTOPPERSプロジェクトは，本ソフトウェアに関して，特定の使用目的
  *  に対する適合性も含めて，いかなる保証も行わない．また，本ソフトウェ
@@ -53,20 +53,20 @@
  *  各タスクの優先度の定義
  */
 
-#define MAIN_PRIORITY	5		/* メインタスクの優先度 */
-								/* HIGH_PRIORITYより高くすること */
+#define MAIN_PRIORITY 5 /* メインタスクの優先度 */
+                        /* HIGH_PRIORITYより高くすること */
 
-#define HIGH_PRIORITY	9		/* 並行実行されるタスクの優先度 */
-#define MID_PRIORITY	10
-#define LOW_PRIORITY	11
+#define HIGH_PRIORITY 9 /* 並行実行されるタスクの優先度 */
+#define MID_PRIORITY 10
+#define LOW_PRIORITY 11
 
 /*
  *  ターゲットに依存する可能性のある定数の定義
  */
 
 #ifndef STACK_SIZE
-#define	STACK_SIZE		4096		/* タスクのスタックサイズ */
-#endif /* STACK_SIZE */
+#define STACK_SIZE 4096 /* タスクのスタックサイズ */
+#endif                  /* STACK_SIZE */
 
 /*
  *  関数のプロトタイプ宣言
@@ -81,14 +81,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void turn_off();
+
 void main_task(intptr_t exinf);
+void kill_btn_task(intptr_t exinf);
 void scanner_task(intptr_t exinf);
 
 void tower_every_1ms();
 
 void walker_task(intptr_t exinf);
 void walker_SmoothMotor_every_1ms();
-
 
 void every_1s();
 void every_1ms();
