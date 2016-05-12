@@ -46,7 +46,7 @@ void Scanner<DistanceSensor>::received_position_message(PositionMessage msg)
 		}
 		if ( _is_boundary_position && (msg.direction == Direction::Left) ) {
 			if ( _background_distance >= 1 )
-				_background_distance = std::max ( 15, _background_distance - 15 );
+				_background_distance = std::max ( Distance(15), Distance(0.85*_background_distance)  );
 			else
 				_background_distance = 254; // only errors were detected
 			fprintf ( bt, "background: %d\n", _background_distance );
