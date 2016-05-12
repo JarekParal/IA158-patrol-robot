@@ -42,7 +42,7 @@ private:
 	static bool continuous_change(Distance prev, Distance curr);
 
 	static bool distance_is_error ( Distance d );
-	static bool distance_is_background ( Distance d );
+	bool distance_is_background ( Distance d ) const;
 
 
     ScannedTarget scanned_target;
@@ -59,6 +59,8 @@ private:
     std::array<bool, map_size> _scanned_map;
     std::array<Distance, map_size> _depth_map;
 
+	bool _background_detected;
+	Distance _background_distance;
 	bool _previous_was_boundary_position;
 	bool _is_boundary_position;
 	Distance _previous_distance;

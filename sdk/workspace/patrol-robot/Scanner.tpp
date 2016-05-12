@@ -9,15 +9,17 @@ Scanner<DistanceSensor>::Scanner(ePortS sonar_port) : _sonar(sonar_port) {
     change_detected = false;
     _direction = Direction::Right;
 	_is_boundary_position = true;
+	_background_detected = false;
+	_background_distance = 10;
 }
 
 template <class DistanceSensor>
 void Scanner<DistanceSensor>::task() {}
 
 template <class DistanceSensor>
-bool Scanner<DistanceSensor>::distance_is_background ( Distance dist )
+bool Scanner<DistanceSensor>::distance_is_background ( Distance dist ) const
 {
-	return dist >= 200;
+	return dist >= _background_distance;
 }
 
 template <class DistanceSensor>
@@ -29,13 +31,21 @@ void Scanner<DistanceSensor>::received_position_message(PositionMessage msg) {
 	_is_boundary_position = (_direction != msg.direction);
 	Distance current_distance = make_sample();
 
-    if ( _is_boundary_position )
-    {
-        print_depth_map();
-        _direction = msg.direction;
-    } else {
-		detect_object(msg.position, current_distance);
+	if ( _background_detected )
+	{
+		if ( _is_boundary_position )
+		{
+			print_depth_map();
+		} else {
+			detect_object(msg.position, current_distance);
+		}
+	} else {
+		_background_distance = std::max(_background_distance, current_distance);
+		if ( _is_boundary_position && (msg.direction == Direction::Left) )
+			_background_detected = true;
 	}
+
+	_direction = msg.direction;
 	_previous_distance = current_distance;
 }
 
@@ -46,7 +56,7 @@ Distance Scanner<DistanceSensor>::previous_distance() const
 	// previous distance elsewhere
 
 	if ( _previous_was_boundary_position )
-		return 200;
+		return _background_distance;
 	else
 		return _previous_distance;
 }
