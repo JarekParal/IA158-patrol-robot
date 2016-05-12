@@ -37,7 +37,7 @@ private:
     Direction _current_direction;
 
     const int8_t abs_speed = 40;
-    const uint16_t wheel_response_time = 200;
+    const uint16_t wheel_response_time = 500;
 };
 
 #endif // WALKER_HPP
