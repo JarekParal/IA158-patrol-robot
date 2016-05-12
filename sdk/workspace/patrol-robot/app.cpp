@@ -13,6 +13,7 @@
 #include <Port.h>
 #include <Motor.h>
 #include <Clock.h>
+#include <IrSensor.h>
 
 // Project
 #include "Common.hpp"
@@ -21,6 +22,7 @@
 #include "Tower.hpp"
 #include "Control.hpp"
 #include "SmoothMotor.hpp"
+
 
 FILE* bt;
 
@@ -35,7 +37,7 @@ class PatrolRobot {
 
 	SmoothMotor walking_motor;
     Walker walker;
-    Scanner scanner;
+    Scanner<ev3api::SonarSensor> scanner;
     Tower tower;
 	Control control;
 

@@ -307,7 +307,9 @@ int16_t ev3_ir_sensor_get_distance(sensor_port_t port) {
 #endif
     int16_t val;
     uart_sensor_fetch_data(port, 0, &val, sizeof(val));
-    return val;
+    if (val > 100)
+        val = -1;
+    return val * 70 / 100;
 
 error_exit:
     syslog(LOG_WARNING, "%s(): ercd %d", __FUNCTION__, ercd);
