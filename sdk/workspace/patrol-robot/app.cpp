@@ -107,7 +107,6 @@ void turn_off() {
         ev3_motor_stop(EV3_PORT_B, true);
         ev3_motor_stop(EV3_PORT_C, true);
         ev3_motor_stop(EV3_PORT_D, true);
-        assert(false);
     }
 }
 
