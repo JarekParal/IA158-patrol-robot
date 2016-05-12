@@ -1,7 +1,10 @@
-#include "Tower.hpp"
-#include "Control.hpp"
 #include <cmath>
 #include <algorithm>
+
+#include "Tower.hpp"
+#include "Scanner.hpp"
+#include "Control.hpp"
+
 
 static void print_tabs ( FILE * fw, size_t tabs )
 {
@@ -57,15 +60,15 @@ void TargetList::remove_old_targets(unsigned age)
 	get_tim (&now);
 
 	auto begin = std::remove_if(_targets.begin(), _targets.end(),
-		[&](const TargetItem& i) {
+			[&](const TargetItem& i) {
 			return now >= i.last_seen && now - i.last_seen > age * 1000;
-		});
+			});
 
 	_targets.erase(begin, _targets.end());
 }
 
-Control::Control ( ID mutex_id, Tower & tower ) :
-	_tower ( tower ), _locked_id(0xFF)
+Control::Control ( ID mutex_id, Tower & tower, IScanner & scanner) :
+	_tower ( tower ), _scanner ( scanner ), _locked_id(0xFF)
 {
 	_mutex_id = mutex_id;
 }
@@ -167,7 +170,7 @@ void Control::lock_target ( TargetId id )
 		{
 			unl_mtx ( _mutex_id );
 			fprintf ( bt, "locking at [%d, %d]\n", it.target.coordinates.x,
-				it.target.coordinates.y );
+					it.target.coordinates.y );
 			_tower.lock_at ( it.target.coordinates );
 			return;
 		}
@@ -177,17 +180,24 @@ void Control::lock_target ( TargetId id )
 	return;
 }
 
+void Control::usage() const
+{
+	fprintf ( bt, 	"Commands:\n"
+			"\tshoot [rounds]\n"
+			"\tcalibrate-tower <angle>\n"
+			"\tlist\n"
+			"\tlock <target_id>\n"
+			"\tlockat <x> <y>\n"
+			"\tset-distance <distance>\n"
+			"\tunlock\n"
+
+			);
+}
+
 void Control::loop()
 {
 	fprintf ( bt, "Robot started\n" );
-	fprintf ( bt, 	"Commands:\n"
-					"\tshoot [rounds]\n"
-					"\tcalibrate-tower <angle>\n"
-					"\tlist\n"
-					"\tlock\n"
-					"\tunlock\n"
-			
-			);
+	usage();
 
 	while(true)
 	{
@@ -209,7 +219,7 @@ void Control::loop()
 			if (1 == sscanf(buff, "calibrate-tower %d", &angle))
 				_tower.calibrate(angle);
 			else
-				fprintf(bt, "usage: calibrate-tower 45\n");
+				usage();
 		}
 		else if (is_prefix_of("list", buff)) {
 			print(bt, _target_list);
@@ -219,8 +229,8 @@ void Control::loop()
 			if ( 2 == sscanf(buff, "lockat %d %d", &x, &y ) )
 				_tower.lock_at ( Coordinates { x, y } );
 			else
-				fprintf (bt, "usage: lockat 8 15\n");
-				
+				usage();
+
 		} else if (is_prefix_of("lock", buff)) {
 			unsigned int target_id;
 			if (1 == sscanf(buff, "lock %u", &target_id)) {
@@ -228,7 +238,7 @@ void Control::loop()
 				_locked_id = target_id;
 			}
 			else
-				fprintf(bt, "usage: lock 12\n");
+				usage();
 		} else if (is_prefix_of("unlock", buff)) {
 			_locked_id = 0xFF;
 			_tower.unlock();
@@ -240,6 +250,16 @@ void Control::loop()
 				_tower.shoot(shots);
 			else
 				_tower.shoot(1);
+		} else if (is_prefix_of("set-background", buff ) )
+		{
+			int d = 0;
+			if ( 1 == sscanf (buff, "set-background %d", &d ) && d >= 0 )
+			{
+				_scanner.set_background(d);
+			} else
+				usage();
+		} else {
+			usage();
 		}
 	}
 }

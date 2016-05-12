@@ -57,7 +57,7 @@ PatrolRobot::PatrolRobot()
     , walker(walking_motor, ePortS::PORT_1)
     , scanner(ePortS::PORT_2)
     , tower(ePortM::PORT_B, ePortM::PORT_C, TOWER_MTX)
-    , control(CONTROL_MTX, tower) {
+    , control(CONTROL_MTX, tower, scanner) {
     walking_motor.on_speed_change = [this](uint8_t speed) {
         tower.walking_speed_changed(speed);
     };

@@ -40,11 +40,12 @@ class TargetList
 };
 
 class Tower;
+class IScanner;
 
 class Control
 {
 	public:
-		explicit Control ( ID mutex_id, Tower & tower );
+		explicit Control ( ID mutex_id, Tower & tower, IScanner & scanner );
 		void loop();
 		void here_is_a_target (DepthObject o);
 		void every_1s();
@@ -52,9 +53,12 @@ class Control
 		void lock_target ( TargetId id );
 
 	private:
+		void usage() const;
+
 		TargetList _target_list;
 		ID         _mutex_id;
 		Tower    & _tower;
+		IScanner  & _scanner;
 		TargetId   _locked_id;
 
 		static const unsigned max_age = 120;

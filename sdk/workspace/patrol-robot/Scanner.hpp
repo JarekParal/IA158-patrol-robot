@@ -10,15 +10,26 @@
 #include "Common.hpp"
 #include "Target.hpp"
 
+
+class IScanner
+{
+	public:
+		virtual void set_background ( Distance d ) = 0;
+};
+
 template <class DistanceSensor>
-class Scanner {
+class Scanner : public IScanner
+{
 public:
     explicit Scanner(ePortS sonar_port);
     void task();
 
     void received_position_message(PositionMessage msg);
     Event<DepthObject> on_target;
-	void set_background ( Distance d );
+
+	// < IScanner >
+	virtual void set_background ( Distance d ) override;
+	// </Iscanner >
 
 private:
     Distance make_sample();

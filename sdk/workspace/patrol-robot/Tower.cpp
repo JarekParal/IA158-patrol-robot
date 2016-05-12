@@ -69,7 +69,7 @@ void Tower::unlock() {
 
 void Tower::shoot(uint8_t shot_number) {
     uint32_t angle = shot_number * degrees_per_shot;
-    _fire_motor.rotate(angle, 3000, false);
+    _fire_motor.rotate(angle, 100, false);
 }
 
 void Tower::update_position(double angle) {
