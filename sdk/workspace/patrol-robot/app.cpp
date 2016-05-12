@@ -28,6 +28,10 @@
 
 FILE* bt;
 
+
+using DistanceSensor = ev3api::SonarSensor;
+//using DistanceSensor = ev3api::IrSensor;
+
 class PatrolRobot {
 public:
     PatrolRobot();

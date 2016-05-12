@@ -74,7 +74,7 @@ void TargetList::update ( ScannedTarget target )
 			continue;
 
 		insert ( i, std::move ( target ), now );
-		ev3_speaker_play_tone(tone_updated_target, tone_updated_target_len);
+		//ev3_speaker_play_tone(tone_updated_target, tone_updated_target_len);
 		return;
 	}
 
@@ -87,7 +87,7 @@ void TargetList::update ( ScannedTarget target )
 
 		i.id = next_id();
 		insert ( i, std::move ( target ), now );
-		ev3_speaker_play_tone(tone_new_target, tone_new_target_len);
+		//ev3_speaker_play_tone(tone_new_target, tone_new_target_len);
 		return;
 	}
 

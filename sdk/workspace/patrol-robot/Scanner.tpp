@@ -1,4 +1,5 @@
 #include <algorithm> // std::reverse
+#include <cmath>     // std::abs
 #include <cassert>
 
 template <class DistanceSensor>
@@ -7,33 +8,133 @@ Scanner<DistanceSensor>::Scanner(ePortS sonar_port) : _sonar(sonar_port) {
     _scanned_map = {};
     change_detected = false;
     _direction = Direction::Right;
+	_is_boundary_position = true;
 }
 
 template <class DistanceSensor>
 void Scanner<DistanceSensor>::task() {}
 
 template <class DistanceSensor>
+bool Scanner<DistanceSensor>::distance_is_background ( Distance dist )
+{
+	return dist >= 200;
+}
+
+template <class DistanceSensor>
 void Scanner<DistanceSensor>::received_position_message(PositionMessage msg) {
 	update_map(msg.position, msg.direction);
 
-    if ( _direction != msg.direction )
+	_previous_was_boundary_position = _is_boundary_position;
+
+	_is_boundary_position = (_direction != msg.direction);
+	Distance current_distance = make_sample();
+
+    if ( _is_boundary_position )
     {
         print_depth_map();
         _direction = msg.direction;
-    }
+    } else {
+		detect_object(msg.position, current_distance);
+	}
+	_previous_distance = current_distance;
+}
+
+template <class DistanceSensor>
+Distance Scanner<DistanceSensor>::previous_distance() const
+{
+	// Background on boundaries,
+	// previous distance elsewhere
+
+	if ( _previous_was_boundary_position )
+		return 200;
+	else
+		return _previous_distance;
+}
+
+template <class DistanceSensor>
+bool Scanner<DistanceSensor>::continuous_change(Distance prev, Distance curr)
+{
+	return std::abs(prev - curr) <= 5;
+}
+
+template <class DistanceSensor>
+void Scanner<DistanceSensor>::continue_detecting_object(Position position, Distance distance)
+{
+	if ( distance_is_error(distance) )
+	{
+		// we assume previous value
+		_current_object_distances.push_back(previous_distance());
+		return;
+	}
+
+	bool background = distance_is_background(distance);
+	bool continuous = continuous_change(previous_distance(), distance);
+
+
+	if ( !background && continuous )
+	{
+		_current_object_distances.push_back(distance);
+	}
+
+	if ( background || !continuous )
+	{
+		// Object ended
+		fprintf ( bt, "Object ended at %d\n", position );
+		// TODO
+		auto min_distance_it = std::min_element(
+				_current_object_distances.begin(),
+				_current_object_distances.end()   );
+		size_t min_position_diff = min_distance_it - _current_object_distances.begin();
+		Position position_of_minimal_distance;
+		if ( _direction == Direction:: Right)
+			position_of_minimal_distance = position + min_position_diff;
+		else
+			position_of_minimal_distance = position - min_position_diff;
+		fprintf ( bt, "Object center at %d\n", position_of_minimal_distance );
+		_detecting_object = false;
+		_current_object_distances.clear();
+	}
+
+	if ( !background && !continuous )
+	{
+		// new object started
+		start_detecting_object(position, distance);
+	}
+
+}
+
+template <class DistanceSensor>
+void Scanner<DistanceSensor>::start_detecting_object(Position position, Distance distance)
+{
+	if ( distance_is_error(distance) || distance_is_background(distance) )
+		return;
+
+	_detecting_object = true;
+	_current_object_distances.clear();
+	_current_object_distances.push_back(distance);
+	_current_object_start = position;	
+}
+
+template <class DistanceSensor>
+void Scanner<DistanceSensor>::detect_object(Position position, Distance distance)
+{
+	if (_detecting_object )
+		continue_detecting_object(position, distance);
+	else
+		start_detecting_object(position, distance);
 }
 
 template <class DistanceSensor>
 void Scanner<DistanceSensor>::update_map(Position position, Direction direction)
 {
     // Out of bounds?
-    if ( (position < 0) || (position >= map_size) )
+    if ( (position < 0) || (position >= (Position)map_size) )
         return;
 
     if (_scanned_map[position]) {
         scan_changes(position, direction);
     } else {
-        Distance distance = make_sample(position);
+        Distance distance = make_sample();
         if (distance != 255) {
             _depth_map[position] = distance;
             _scanned_map[position] = true;
@@ -58,11 +159,11 @@ void Scanner<DistanceSensor>::print_depth_map()
 }
 
 template <class DistanceSensor>
-Distance Scanner<DistanceSensor>::make_sample(Position position) {
+Distance Scanner<DistanceSensor>::make_sample() {
     std::vector<int16_t> samples;
 
     int16_t d = _sonar.getDistance();
-    fprintf(bt, "%d\n", d);
+    //fprintf(bt, "%d\n", d);
     //fprintf(bt, "Position: %d, Distance: %d\n", position, d);
     return d;
 
@@ -71,14 +172,6 @@ Distance Scanner<DistanceSensor>::make_sample(Position position) {
     }
 
     return median_distance(samples);
-
-    /*if (distance != 255) {
-      _depth_map[position] = median_distance(samples);
-      _scanned_map[position] = true;
-      }*/
-
-    // fprintf(bt, "Position: %d, Distance: %d\n", position,
-    // _depth_map[position]);
 }
 
 template <class DistanceSensor>
@@ -132,9 +225,20 @@ void Scanner<DistanceSensor>::reorder_target()
 }
 
 template <class DistanceSensor>
+bool Scanner<DistanceSensor>::distance_is_error(Distance d)
+{
+	if (d >= 255)
+		return true;
+	if (d < 0 )
+		return true;
+
+	return false;
+}
+
+template <class DistanceSensor>
 void Scanner<DistanceSensor>::update_changes(Position position, Distance distance, Direction current_dir)
 {
-    if ( distance = 255 )
+    if ( distance_is_error(distance) )
         distance = scanned_target.distances.back();
 
     bool moved = has_moved(position, distance);
@@ -165,7 +269,7 @@ void Scanner<DistanceSensor>::scan_changes(Position position, Direction current_
     assert ( position >= 0 );
     assert(_scanned_map[position]);
 
-    Distance distance = make_sample(position);
+    Distance distance = make_sample();
 
     if (change_detected)
         update_changes(position, distance, current_dir);

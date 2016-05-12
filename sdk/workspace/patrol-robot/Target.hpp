@@ -26,4 +26,11 @@ bool match ( ScannedTarget const & a, ScannedTarget const & b );
  */
 void strip ( ScannedTarget & target );
 
+
+struct DepthObject
+{
+	Coordinates coordinates;
+};
+
+
 #endif // TARGET_HPP_
